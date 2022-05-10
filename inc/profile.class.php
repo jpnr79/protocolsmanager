@@ -16,24 +16,50 @@ class PluginProtocolsmanagerProfile extends CommonDBTM
 	
 	static function showRightsForm($profile_id) {
 		global $CFG_GLPI, $DB;
-		
-		$req = $DB->request(
-			'glpi_plugin_protocolsmanager_profiles',
-			['profile_id' => $profile_id]);
+
+		// Le problème c'est qu'on peut que éditer un type d'user qui est déjà référencé dans la bdd glpi_plugin_protocolsmanager_profiles
+		foreach($DB->request('glpi_plugin_protocolsmanager_profiles', ['profile_id' => $profile_id]) as $data) {
 			
-		if ($row = $req->next()) {
-			$plugin_conf = $row['plugin_conf'];
-			$tab_access = $row['tab_access'];
+			if($data['plugin_conf']) {
+				$plugin_conf = $data['plugin_conf'];
+				$tab_access = $data['tab_access'];
+				$edit_flag = 1;
+			}
+			else{
+				$edit_flag = 0;
+				$plugin_conf = "";
+				$tab_access = "";
+			}
+			// if(count($data) == 0)
+			// {
+			// 	$edit_flag = 1;
+			// 	$plugin_conf ="";
+			// 	$tab_access ="";
+			// }
+			// else {
+			// 	$edit_flag = 0;
+
+			// }
+
 		}
+
+		// $req = $DB->request(
+		// 	'glpi_plugin_protocolsmanager_profiles',
+		// 	['profile_id' => $profile_id]);
 			
-		if (count($req) == 0) {
-			$edit_flag = 1;
-			$plugin_conf ="";
-			$tab_access ="";
-		} else {
-			$edit_flag = 0;
-		}
-		
+		// if ($row = $req->next()) {
+		// 	$plugin_conf = $row['plugin_conf'];
+		// 	$tab_access = $row['tab_access'];
+		// }
+			
+		// if (count($req) == 0) {
+		// 	$edit_flag = 1;
+		// 	$plugin_conf ="";
+		// 	$tab_access ="";
+		// } else {
+		// 	$edit_flag = 0;
+		// }
+
 		echo "<form name='profiles' action='". $CFG_GLPI["root_doc"] ."/plugins/protocolsmanager/front/profile.form.php' method='post'>";
 		echo "<div class='center'>";
 		echo "<table class='tab_cadre_fixehov'>";

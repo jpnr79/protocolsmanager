@@ -6,6 +6,7 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 	function showFormProtocolsmanager() {
 		global $CFG_GLPI, $DB;
 		$plugin_conf = self::checkRights();
+
 		if ($plugin_conf == 'w') {	
 			self::displayContent();	
 		} else {
@@ -17,15 +18,18 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 	static function checkRights() {
 		global $DB;
 		$active_profile = $_SESSION['glpiactiveprofile']['id'];
-		$req = $DB->request('glpi_plugin_protocolsmanager_profiles',
-						['profile_id' => $active_profile]);
-						
-		if ($row = $req->next()) {
-			$plugin_conf = $row["plugin_conf"];
-		} else {
-			$plugin_conf = "";
+		
+		foreach($DB->request('glpi_plugin_protocolsmanager_profiles', ['profile_id' => $active_profile]) as $data) {
+			
+			if($data['plugin_conf']) {
+				$plugin_conf = $data['plugin_conf'];
+				return $plugin_conf;
+			}
+			else{
+				$plugin_conf = "";
+			}
+
 		}
-		return $plugin_conf;
 	}
 	
 	static function displayContent() {
@@ -52,11 +56,12 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 			$edit_id = $_POST['edit_id'];
 			$mode = $edit_id;
 			
-			$req = $DB->request(
-				'glpi_plugin_protocolsmanager_config',
-				['id' => $edit_id ]);
+			$query = "SELECT *
+					  FROM glpi_plugin_protocolsmanager_config
+					  WHERE id ='$edit_id'";
+			$res = $DB->query($query);
 				
-			if ($row = $req->next()) {
+			if ($row = $DB->fetchAssoc($res)) {
 				$template_uppercontent = $row["upper_content"];
 				$template_content = $row["content"];
 				$template_footer = $row["footer"];
@@ -165,7 +170,7 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 		echo "<tr><td>".__('City')."</td><td colspan='2'><input type='text' name='city' style='width:80%;' value='$city'></td></tr>";
 		echo "<tr><td>".__('Upper Content')."</td><td colspan='2' class='middle'><textarea style='width:80%; height:100px;' cols='50' rows'8' name='template_uppercontent'>".$template_uppercontent."</textarea></td></tr>";
 		echo "<tr><td>".__('Content')."</td><td colspan='2' class='middle'><textarea style='width:80%; height:100px;' cols='50' rows'8' name='template_content'>".$template_content."</textarea></td></tr>";
-		echo "<tr><td>".__('Footer')."</td><td class='middle' colspan='2'><textarea style='width:80%; height:100px;' cols='45' rows'4' name='footer_text'>".$template_footer."</textarea></td></tr>";
+		echo "<tr><td>".__('Footer')."</td><td class='middle' colspan='2'><textarea style='width:80%; height:100px;' cols='45' rows'4' name='footer_text'>".$template_footer."</textarea></td></tr>";	
 		echo "<tr><td>".__('Orientation')."</td><td colspan='2'><select name='orientation' style='width:150px'>";
 			foreach($orientations as $vals => $valname) {
 				echo "<option value='".$vals."' ";
@@ -212,8 +217,9 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 				echo '>';
 				echo $list["tname"];
 				echo '</option>';
-			}	
+			}
 		echo "</select></td></tr>";
+
 		echo "</table>";
 		echo "<table class='tab_cadre_fixe'><td style='text-align:right;'><input type='submit' name='save' class='submit'></td>";
 		Html::closeForm();
@@ -245,12 +251,15 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 		if (isset($_POST["email_edit_id"])) {
 			
 			$email_edit_id = $_POST['email_edit_id'];
-			
-			$req = $DB->request(
-				'glpi_plugin_protocolsmanager_emailconfig',
-				['id' => $email_edit_id ]);
+
+			$query = 
+				"SELECT *
+				FROM glpi_plugin_protocolsmanager_emailconfig
+				WHERE id ='$email_edit_id'";			
+
+			$res = $DB->query($query);
 				
-			if ($row = $req->next()) {
+			if ($row = $DB->fetchAssoc($res)) {
 				$tname = $row["tname"];
 				$send_user = $row["send_user"];
 				$email_subject = $row["email_subject"];
@@ -301,21 +310,45 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 		if (empty($_POST["template_name"])) {
 			Session::AddMessageAfterRedirect('Fill mandatory fields', 'WARNING', true);
 		} else {
-		
+
+			// en général c'est soient des champs obligatoires soit du texte par défaut pas changeables mais avec une valeur différent de null
 			$template_name = $_POST['template_name'];
-			$template_uppercontent = $_POST['template_uppercontent'];
-			$template_content = $_POST['template_content'];
-			$template_footer = $_POST['footer_text'];
 			$font = $_POST["font"];
 			$fontsize = $_POST["fontsize"];
-			$city = $_POST["city"];
-			$mode = $_POST["mode"];
 			$serial_mode = $_POST["serial_mode"];
 			$orientation = $_POST["orientation"];
-			$breakword = $_POST["breakword"];
-			$email_mode = $_POST["email_mode"];
-			$email_template = $_POST["email_template"];
 
+			if(isset($_POST["template_uppercontent"])) {
+				$template_uppercontent = $_POST['template_uppercontent'];
+			}
+			
+			if(isset($_POST["template_content"])) {
+				$template_content = $_POST['template_content'];
+			}
+
+			if(isset($_POST["footer_text"])) {
+				$template_footer = $_POST['footer_text'];
+			}
+
+			if(isset($_POST["city"])) {
+				$city = $_POST["city"];
+			}
+
+			if(isset($_POST["mode"])) {
+				$mode = $_POST["mode"];
+			}
+
+			if(isset($_POST["breakword"])) {
+				$breakword = $_POST["breakword"];
+			}
+
+			if(isset($_POST["email_mode"])) {
+				$email_mode = $_POST["email_mode"];
+			}
+
+			if(isset($_POST["email_template"])) {
+				$email_template = $_POST["email_template"];
+			}
 			
 			if (isset($_POST['img_delete'])) {
 				
@@ -375,8 +408,43 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 						]
 					);
 				} else {
-					
-					$DB->update('glpi_plugin_protocolsmanager_config', [
+					if(!$city)
+					{
+						$city = '';
+					}
+					if(!$template_uppercontent)
+					{
+						$template_uppercontent = '';
+					}
+					if(!$template_content)
+					{
+						$template_content = '';
+					}
+					if(!$template_footer)
+					{
+						$template_footer = '';
+					}
+					if(!isset($email_mode))
+					{
+						$DB->update('glpi_plugin_protocolsmanager_config', [
+							'name' => $template_name,
+							'content' => $template_content,
+							'upper_content' => $template_uppercontent,
+							'footer' => $template_footer,
+							'font' => $font,
+							'fontsize' => $fontsize,
+							'city' => $city,
+							'serial_mode' => $serial_mode,
+							'orientation' => $orientation,
+							'breakword' => $breakword,
+							'email_template' =>$email_template
+						], [
+							'id' => $mode
+						]
+					);
+					}
+					else {
+						$DB->update('glpi_plugin_protocolsmanager_config', [
 							'name' => $template_name,
 							'content' => $template_content,
 							'upper_content' => $template_uppercontent,
@@ -393,6 +461,7 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 							'id' => $mode
 						]
 					);
+					}
 				}
 			}
 			

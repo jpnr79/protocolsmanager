@@ -17,4 +17,10 @@ if (isset($_REQUEST['send'])) {
 	Html::back();
 }
 
+// techniciens
+// if (isset($_REQUEST['choiceuserfield'])) {
+// 	$_SESSION['userfield'] = $_POST['userfield'];
+// 	Html::back();
+// }
+
 ?>

@@ -37,9 +37,15 @@ footer
 <?php 
 	if ($islogo == 1) {
 
-		echo '<img src="';
-		echo $logo;
-		echo '" style="display: block; width: 100%; height: 20mm;">';
+
+		$img_type = pathinfo($logo, PATHINFO_EXTENSION);
+		$img_data = file_get_contents($logo);
+		$base64 = 'data:image/'.$img_type.';base64,'.base64_encode($img_data);
+		echo "<img src = '".$base64."' style='display: block; width: 100%; height: 20mm;'>";
+
+		// echo '<img src="';
+		// echo $logo;
+		// echo '" style="display: block; width: 100%; height: 20mm;">';
 
 	}
 ?>
@@ -88,17 +94,47 @@ footer
 			</tr>";
 			
 			$lp = 1;
-			foreach ($number as $key) {
-				if (isset($type_name[$key])) {
-				echo '<tr><td>'. $lp . '</td>';
-				echo '<td>' . $type_name[$key] .'</td>';
-				echo '<td>'. $man_name[$key] .' '. $mod_name[$key]. '</td>';
-				echo '<td>' .$item_name[$key] .'</td>';
-				echo '<td>'. $serial[$key] .'</td>';
-				echo '<td>'. $otherserial[$key] .'</td></tr>';
+			$conca = '';
+			if (isset($number))
+			{
+				foreach ($number as $key) {
+
+					$conca = '<tr><td>'. $lp . '</td>';
+	
+					if (isset($type_name[$key])) {
+						$conca .= '<td>' . $type_name[$key] .'</td>';
+					}
+					
+					if(isset($man_name[$key]))
+					{
+						if(isset($mod_name[$key]))
+						{
+							$conca .= '<td>'. $man_name[$key] .' '. $mod_name[$key]. '</td>';
+
+						}
+						else {
+							$conca .= '<td>'. $man_name[$key] .'</td>';
+						}
+					}
+	
+					if (isset($item_name[$key])) {
+						$conca .= '<td>' .$item_name[$key] .'</td>';
+					}
+	
+					if (isset($serial[$key])) {
+						$conca .= '<td>'. $serial[$key] .'</td>';
+					}
+	
+					if (isset($otherserial[$key])) {
+						$conca .= '<td>'. $otherserial[$key] .'</td>';
+					}
+	
+					echo $conca .= '</tr>';
+	
+					$lp++;
 				}
-				$lp++;
 			}
+
 		}
 
 		//if serial and inventory in one column
@@ -118,19 +154,48 @@ footer
 			</tr>";
 			
 			$lp = 1;
-			foreach ($number as $key) {
-				if (empty($serial[$key])) {
-					$serial[$key]=$otherserial[$key];
-				} //if no serial, get inventory number
-				if (isset($type_name[$key])){
-				echo '<tr><td>'. $lp .'</td>';
-				echo '<td>'. $type_name[$key] .'</td>';
-				echo '<td>'. $man_name[$key] .' '. $mod_name[$key]. '</td>';
-				echo '<td>'. $item_name[$key] .'</td>';
-				echo '<td>'. $serial[$key] .'</td></tr>';
+
+			$conca = '';
+			if (isset($number))
+			{
+				foreach ($number as $key) {
+
+					if (empty($serial[$key])) {
+						$serial[$key]=$otherserial[$key];
+					} //if no serial, get inventory number
+
+					$conca = '<tr><td>'. $lp . '</td>';
+	
+					if (isset($type_name[$key])) {
+						$conca .= '<td>' . $type_name[$key] .'</td>';
+					}
+
+					if(isset($man_name[$key])) 
+					{
+						if(isset($mod_name[$key]))
+						{
+							$conca .= '<td>'. $man_name[$key] .' '. $mod_name[$key]. '</td>';
+
+						}
+						else {
+							$conca .= '<td>'. $man_name[$key] .'</td>';
+						}
+					}
+	
+					if (isset($item_name[$key])) {
+						$conca .= '<td>' .$item_name[$key] .'</td>';
+					}
+	
+					if (isset($serial[$key])) {
+						$conca .= '<td>'. $serial[$key] .'</td>';
+					}
+	
+					echo $conca .= '</tr>';
+	
+					$lp++;
 				}
-				$lp++;
 			}
+
 		}
 
 	}
@@ -156,17 +221,49 @@ footer
 			</tr>";
 			
 			$lp = 1;
-			foreach ($number as $key){
-				if (isset($type_name[$key])){
-				echo '<tr><td>'. $lp . '</td>';
-				echo '<td>'. $type_name[$key] .'</td>';
-				echo '<td>'. $man_name[$key] .' '. $mod_name[$key]. '</td>';
-				echo '<td>'. $item_name[$key]. '</td>';
-				echo '<td>' . $serial[$key] .'</td>';
-				echo '<td>'. $otherserial[$key] .'</td>';
-				echo '<td>'. $comments[$key] .'</td></tr>';
+			$conca = '';
+			if (isset($number))
+			{
+				foreach ($number as $key) {
+
+					$conca = '<tr><td>'. $lp . '</td>';
+	
+					if (isset($type_name[$key])) {
+						$conca .= '<td>' . $type_name[$key] .'</td>';
+					}
+	
+					if(isset($man_name[$key])) 
+					{
+						if(isset($mod_name[$key]))
+						{
+							$conca .= '<td>'. $man_name[$key] .' '. $mod_name[$key]. '</td>';
+
+						}
+						else {
+							$conca .= '<td>'. $man_name[$key] .'</td>';
+						}
+					}
+	
+					if (isset($item_name[$key])) {
+						$conca .= '<td>' .$item_name[$key] .'</td>';
+					}
+	
+					if (isset($serial[$key])) {
+						$conca .= '<td>'. $serial[$key] .'</td>';
+					}
+	
+					if (isset($otherserial[$key])) {
+						$conca .= '<td>'. $otherserial[$key] .'</td>';
+					}
+
+					if (isset($comments[$key])) {
+						$conca .= '<td>'. $comments[$key] .'</td>';
+					}
+	
+					echo $conca .= '</tr>';
+	
+					$lp++;
 				}
-				$lp++;
 			}
 		}
 
@@ -188,19 +285,49 @@ footer
 			</tr>";
 			
 			$lp = 1;
-			foreach ($number as $key){
-				if (empty($serial[$key])) {
-					$serial[$key]=$otherserial[$key];
-				} //if no serial, get inventory number
-				if (isset($type_name[$key])){
-				echo '<tr><td>'. $lp . '</td>';
-				echo '<td>'. $type_name[$key] .'</td>';
-				echo '<td>'. $man_name[$key] .' '. $mod_name[$key]. '</td>';
-				echo '<td>'. $item_name[$key] .'</td>';
-				echo '<td>' . $serial[$key] .'</td>';
-				echo '<td>'. $comments[$key] .'</td></tr>';
+			$conca = '';
+			if (isset($number))
+			{
+				foreach ($number as $key) {
+
+					if (empty($serial[$key])) {
+						$serial[$key]=$otherserial[$key];
+					} //if no serial, get inventory number
+
+					$conca = '<tr><td>'. $lp . '</td>';
+	
+					if (isset($type_name[$key])) {
+						$conca .= '<td>' . $type_name[$key] .'</td>';
+					}
+	
+					if(isset($man_name[$key])) 
+					{
+						if(isset($mod_name[$key]))
+						{
+							$conca .= '<td>'. $man_name[$key] .' '. $mod_name[$key]. '</td>';
+
+						}
+						else {
+							$conca .= '<td>'. $man_name[$key] .'</td>';
+						}
+					}
+	
+					if (isset($item_name[$key])) {
+						$conca .= '<td>' .$item_name[$key] .'</td>';
+					}
+	
+					if (isset($serial[$key])) {
+						$conca .= '<td>'. $serial[$key] .'</td>';
+					}
+
+					if (isset($comments[$key])) {
+						$conca .= '<td>'. $comments[$key] .'</td>';
+					}
+	
+					echo $conca .= '</tr>';
+	
+					$lp++;
 				}
-				$lp++;
 			}
 		}
 

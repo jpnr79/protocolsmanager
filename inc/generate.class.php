@@ -1,10 +1,9 @@
 <?php
+if (!defined('GLPI_ROOT')) {
+	die("Sorry. You can't access directly to this file");
+ }
 
-//$autoload = dirname(__DIR__) . '/vendor/autoload.php';
-//require_once $autoload;
-
-//use Spipu\Html2Pdf\Html2Pdf;
-require_once dirname(__DIR__) . '/dompdf/autoload.inc.php';
+require_once dirname(__DIR__) . '/dompdf/vendor/autoload.php';
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -14,36 +13,40 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			return self::createTabEntry('Protocols manager');
 		}
 
-		
+		// OK
 		static function displayTabContentForItem(CommonGLPI $item, $tabnum=1, $withtemplate=0) {
 			global $DB, $CFG_GLPI;
 			
 			$tab_access = self::checkRights();
 		
-			if ($tab_access == 'w') {	
+			if ($tab_access == 'w') {
 				$PluginProtocolsmanagerGenerate = new self();
-				$PluginProtocolsmanagerGenerate->showContent($item);	
+				$PluginProtocolsmanagerGenerate->showContent($item);
 			} else {
 				echo "<div align='center'><br><img src='".$CFG_GLPI['root_doc']."/pics/warning.png'><br>".__("Access denied")."</div>";
 			}
 		}
 		
+		// OK
 		//check if logged user have rights to plugin
 		static function checkRights() {
 			global $DB;
 			$active_profile = $_SESSION['glpiactiveprofile']['id'];
-			$req = $DB->request('glpi_plugin_protocolsmanager_profiles',
-							['profile_id' => $active_profile]);
-							
-			if ($row = $req->next()) {
-				$tab_access = $row["tab_access"];
-			} else {
-				$tab_access = "";
+
+			foreach($DB->request('glpi_plugin_protocolsmanager_profiles', ['profile_id' => $active_profile]) as $data) {
+			
+				if($data['tab_access']) {
+					$tab_access = $data['tab_access'];
+					return $tab_access;
+				}
+				else{
+					$tab_access = "";
+				}
+	
 			}
-			return $tab_access;
 		}
 		
-		
+		// OK
 		//show plugin content
 		function showContent($item) {
 			global $DB, $CFG_GLPI;
@@ -51,14 +54,13 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			$type_user   = $CFG_GLPI['linkuser_types'];
 			$field_user  = 'users_id';
 			$rand = mt_rand();
-			
 			$counter = 0;
-			
-			echo "<form method='post' name='protocolsmanager_form$rand' id='protocolsmanager_form$rand'	action=\"" . $CFG_GLPI["root_doc"] . "/plugins/protocolsmanager/front/generate.form.php\">";
+
+			echo "<form method='post' name='user_field".$rand."' id='user_field".$rand."' action=\"" . $CFG_GLPI["root_doc"] . "/plugins/protocolsmanager/front/generate.form.php\">";
 			echo "<table class='tab_cadre_fixe'><tr><td style ='width:25%'></td>";
 			echo "<td class='center' style ='width:25%'>";
 			echo "<select name='list' style='font-size:14px; width:95%'>";
-				foreach ($doc_types = $DB->request('glpi_plugin_protocolsmanager_config', 
+				foreach ($doc_types = $DB->request('glpi_plugin_protocolsmanager_config',
 				['FIELDS' => ['glpi_plugin_protocolsmanager_config' => ['id', 'name']]]) as $uid => $list) {
 					echo '<option value="';
 					echo $list["id"];
@@ -71,6 +73,8 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			echo "<td style='width:30%'></td></tr>";
 			echo "<tr><td></td><td colspan='2'><input type='text' name='notes' placeholder='".__('Note')."' style='width:89%; font-size:14px; padding: 2px'></td><td></td></tr>";
 			echo "</table>";
+
+			// Premier tableau
 			echo "<div class='spaced'><table class='tab_cadre_fixehov' id='additional_table'>";
 			$header = "<th width='10'><input type='checkbox' class='checkall' style='height:16px; width: 16px;'></th>";
 			$header .= "<th>".__('Type')."</th>";
@@ -82,146 +86,156 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			$header .= "<th>".__('Comments')."</th></tr>";
 			echo $header;
 			
-			foreach ($type_user as $itemtype) {
-				if (!($item = getItemForItemtype($itemtype))) {
-					continue;
-				}
-				if ($item->canView()) {
-					$itemtable = getTableForItemType($itemtype);
-					$iterator_params = [
-					   'FROM'   => $itemtable,
-					   'WHERE'  => [$field_user => $id]
-					];
-					if ($item->maybeTemplate()) {
-					   $iterator_params['WHERE']['is_template'] = 0;
+				foreach ($type_user as $itemtype) {
+					if (!($item = getItemForItemtype($itemtype))) {
+						continue;
 					}
-					
-					if ($item->maybeDeleted()) {
-					   $iterator_params['WHERE']['is_deleted'] = 0;
-					}
-					
-					$item_iterator = $DB->request($iterator_params);
-					$type_name = $item->getTypeName();
-					
-					while ($data = $item_iterator->next()) {
-						$cansee = $item->can($data["id"], READ);
-						   $link   = $data["name"];
-							if ($cansee) {
-								$link_item = $item::getFormURLWithID($data['id']);
-								if ($_SESSION["glpiis_ids_visible"] || empty($link)) {
-								 $link = sprintf(__('%1$s (%2$s)'), $link, $data["id"]);
+					if ($item->canView()) {
+
+						// il va récupérer toutes les tables du matos
+						$itemtable = getTableForItemType($itemtype);
+						
+						$iterator_params = "SELECT *
+						FROM $itemtable
+						WHERE $field_user = $id";
+
+						if ($item->maybeTemplate()) {
+							// j'ai du mettre un espace après le " et le and car sinon dans la requete les deux sont collés et ça casse la requête
+							$iterator_params .= " AND is_template = 0";
+						}
+						
+						if ($item->maybeDeleted()) {
+							$iterator_params .= " AND is_deleted = 0";
+						}
+
+						$item_iterator = $DB->query($iterator_params);
+						$type_name = $item->getTypeName();
+
+						while ($data = $DB->fetchAssoc($item_iterator)) {
+								$cansee = $item->can($data["id"], READ);
+								$link  = $data["name"];
+								if ($cansee) {
+									$link_item = $item::getFormURLWithID($data['id']);
+									if ($_SESSION["glpiis_ids_visible"] || empty($link)) {
+										$link = sprintf(__('%1$s (%2$s)'), $link, $data["id"]);
+									}
+									$link = "<a href='".$link_item."'>".$link."</a>";
 								}
-								$link = "<a href='".$link_item."'>".$link."</a>";
-							}
-							$linktype = "";
-							if ($data[$field_user] == $id) {
-								$linktype = self::getTypeName(1);
-							}
-							
-							echo "<tr class='tab_bg_1'>";
-							echo "<td width='10'>";
-							echo "<input type='checkbox' name='number[]' value='$counter' class='child' style='height:16px; width: 16px;'>";
-							echo "</td>";	
-							echo "<td class='center'>$type_name</td>";
-							echo "<td class='center'>";
-							
-							if (isset($data["manufacturers_id"]) && !empty($data["manufacturers_id"])) {
-								
-								$man_id = $data["manufacturers_id"];
-														
-								$req = $DB->request(
-									'glpi_manufacturers',
-									['id' => $man_id ]);
-								
-								if ($row = $req->next()) {
-									$man_name = $row["name"];
+								$linktype = "";
+								if ($data[$field_user] == $id) {
+									$linktype = self::getTypeName(1);
 								}
 								
-								$modeltypes = ["computer", "phone", "monitor", "networkequipment", "printer", "peripheral"];
-								$mod_name = '';
+								echo "<tr class='tab_bg_1'>";
+								echo "<td width='10'>";
+								echo "<input type='checkbox' name='number[]' value='$counter' class='child' style='height:16px; width: 16px;'>";
+								echo "</td>";
+								echo "<td class='center'>$type_name</td>";
+								echo "<td class='center'>";
 								
-								foreach($modeltypes as $prefix) {
-									if(isset($data[$prefix.'models_id']) && !empty($data[$prefix.'models_id'])) {
-										$mod_id = $data[$prefix.'models_id'];
+								if (isset($data["manufacturers_id"]) && !empty($data["manufacturers_id"])) {
+									
+									$man_id = $data["manufacturers_id"];
+									
+									$req = "SELECT *
+											FROM glpi_manufacturers
+											WHERE id = $man_id";
 										
-										$req2 = $DB->request(
-											'glpi_'.$prefix.'models',
-											['id' => $mod_id ]);
-											
-										if ($row2 = $req2->next()) {
-											$mod_name = $row2["name"];
+									$resq = $DB->query($req);
+									
+									if ($row = $DB->fetchAssoc($resq)) {
+										$man_name = $row["name"];
+									}
+									
+									$modeltypes = ["computer", "phone", "monitor", "networkequipment", "printer", "peripheral"];
+									$mod_name = '';
+									
+									foreach($modeltypes as $prefix) {
+										if(isset($data[$prefix.'models_id']) && !empty($data[$prefix.'models_id'])) {
+											$mod_id = $data[$prefix.'models_id'];
+
+											$req2 = "SELECT *
+											FROM glpi_".$prefix."models
+											WHERE id = $man_id";
+
+											$resq2 = $DB->query($req2);
+ 
+											if ($row2 = $DB->fetchAssoc($resq2)) {
+												$mod_name = $row2["name"];
+											}
 										}
 									}
+									
+									$man_name = explode(' ',trim($man_name))[0];
+									echo $man_name.' '.$mod_name;
+									
+								}
+								else {
+									echo '&nbsp;';
+									$man_name = '';
+									$mod_name = '';
+								}
+								echo "</td>";
+								echo "<td class='center'>$link</td>";
+								echo "<td class='center'>";
+								
+								if (isset($data["serial"]) && !empty($data["serial"])) {
+									$serial = $data["serial"];
+									echo $serial;
+								} else {
+									echo '&nbsp;';
+									$serial = '';
 								}
 								
-								$man_name = explode(' ',trim($man_name))[0];
-								echo $man_name.' '.$mod_name;
+								echo "</td>";
+								echo "<td class='center'>";
 								
-							} 
-							else {
-								echo '&nbsp;';
-								$man_name = '';
-								$mod_name = '';
-							}
-							echo "</td>";
-							echo "<td class='center'>$link</td>";
-							echo "<td class='center'>";
-							
-							if (isset($data["serial"]) && !empty($data["serial"])) {
-								$serial = $data["serial"];
-								echo $serial;
-							} else {
-								echo '&nbsp;';
-								$serial = '';
-							}
-							
-							echo "</td>";
-							echo "<td class='center'>";
-							
-							if (isset($data["otherserial"]) && !empty($data["otherserial"])) {
-								$otherserial = $data["otherserial"];
-								echo $otherserial;
-							} else {
-								echo '&nbsp;';
-								$otherserial = '';
-							}
-							
-							echo "</td>";
-							
-							if (isset($data["name"]) && !empty($data["name"])) {
-								$item_name = $data["name"];
-							}
-							else
-								$item_name = '';
-							
-							$Owner = new User();
-							$Owner->getFromDB($id);
-							$Author = new User();
-							$Author->getFromDB(Session::getLoginUserID());
-							$owner = $Owner->getRawName();
-							$author = $Author->getRawName();
-							
-							
-							echo "<input type='hidden' name='owner' value ='$owner'>";
-							echo "<input type='hidden' name='author' value ='$author'>";
-							echo "<input type='hidden' name='type_name[]' value='$type_name'>";
-							echo "<input type='hidden' name='man_name[]' value='$man_name'>";
-							echo "<input type='hidden' name='mod_name[]' value='$mod_name'>";
-							echo "<input type='hidden' name='serial[]' value='$serial'>";
-							echo "<input type='hidden' name='otherserial[]' value='$otherserial'>";
-							echo "<input type='hidden' name='item_name[]' value='$item_name'>";
-							echo "<input type='hidden' name='user_id' value='$id'>";
-							
-							echo "<td class='center'><input type='text' name='comments[]'></td>";
-							echo "</tr>";
-
-							
-						$counter++;
+								if (isset($data["otherserial"]) && !empty($data["otherserial"])) {
+									$otherserial = $data["otherserial"];
+									echo $otherserial;
+								} else {
+									echo '&nbsp;';
+									$otherserial = '';
+								}
+								
+								echo "</td>";
+								
+								if (isset($data["name"]) && !empty($data["name"])) {
+									$item_name = $data["name"];
+								}
+								else
+									$item_name = '';
+								
+								$Owner = new User();
+								$Owner->getFromDB($id);
+								$Author = new User();
+								$Author->getFromDB(Session::getLoginUserID());
+								// getrawname remplacé https://github.com/glpi-project/glpi/blob/10.0/bugfixes/CHANGELOG.md
+								// il y avait aussi getRawName() mais je suis pas sur que ça soit vu le changelog
+								$owner = $Owner->getFriendlyName();
+								$author = $Author->getFriendlyName();
+								
+								echo "<input type='hidden' name='owner' value ='$owner'>";
+								echo "<input type='hidden' name='author' value ='$author'>";
+								echo "<input type='hidden' name='type_name[]' value='$type_name'>";
+								echo "<input type='hidden' name='man_name[]' value='$man_name'>";
+								echo "<input type='hidden' name='mod_name[]' value='$mod_name'>";
+								echo "<input type='hidden' name='serial[]' value='$serial'>";
+								echo "<input type='hidden' name='otherserial[]' value='$otherserial'>";
+								echo "<input type='hidden' name='item_name[]' value='$item_name'>";
+								echo "<input type='hidden' name='user_id' value='$id'>";
+								
+								echo "<td class='center'><input type='text' name='comments[]'></td>";
+								echo "</tr>";
+								
+								
+							$counter++;
+						}
+						
 					}
 					
 				}
-				
-			}				
+
 				
 				echo "</table>";
 				Html::closeForm();
@@ -229,40 +243,60 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				
 				
 				//send email popup
-				echo "<div class='dialog' title='".__('Send')." email'><p>Select recipients from template or enter manually to send email</p><br><br>";	
-				echo "<form method='post' action='".$CFG_GLPI["root_doc"]."/plugins/protocolsmanager/front/generate.form.php'>";
-				
-				echo "<input type='hidden' id='dialogVal' name='doc_id' value=''>";
-				echo "<input type='radio' name='send_type' id='manually' class='send_type' value='1'><b> Enter recipients manually </b><br><br>";
-				echo "<textarea style='width:90%; height:30px' name='em_list' class='man_recs' placeholder='Recipients (use ; to separate emails)'></textarea><br><br>";
-				echo "<input type='text' style='width:90%' name='email_subject' class='man_recs' placeholder='Subject'><br><br>";
-				echo "<textarea style='width:90%; height:80px' name='email_content' class='man_recs' placeholder='Content'></textarea><br><br>";
 
-				
-				echo "<input type='radio' name='send_type' id='auto' class='send_type' value='2'><b> Select recipients from template</b><br><br>";
-				
-				echo "<select name='e_list' id='auto_recs' disabled='disabled' style='font-size:14px; width:95%'>";
+				$conca  = '<div class="modal fade" id="motus" role="dialog">';
+				$conca .= '<div class="modal-dialog">';
+				$conca .= '<div class="modal-content">';
+				$conca .= '<div class="modal-header">';
+				$conca .= '<h4 class="modal-title">'.__("Send").' email</h4>';
+				$conca .= '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>';
+				$conca .= '</div><div class="modal-body" title="'.__("Send").' email"><p>Select recipients from template or enter manually to send email</p><br><br>';
+				$conca .= '<form method="post" action="'.$CFG_GLPI["root_doc"].'/plugins/protocolsmanager/front/generate.form.php">';
+				$conca .= '<input type="hidden" id="dialogVal" name="doc_id" value="">';
+				$conca .= '<input type="radio" name="send_type" id="manually" class="send_type" value="1"><b> Enter recipients manually </b><br><br>';
+				$conca .= '<textarea style="width:90%; height:30px" name="em_list" class="man_recs" placeholder="Recipients (use ; to separate emails)"></textarea><br><br>';
+				$conca .= '<input type="text" style="width:90%" name="email_subject" class="man_recs" placeholder="Subject"><br><br>';
+				$conca .= '<textarea style="width:90%; height:80px" name="email_content" class="man_recs" placeholder="Content"></textarea><br><br>';
+				$conca .= '<input type="radio" name="send_type" id="auto" class="send_type" value="2"><b> Select recipients from template</b><br><br>';
+
+				$conca .= '<select name="e_list" id="auto_recs" disabled="disabled" style="font-size:14px; width:95%">';
 
 				foreach ($DB->request('glpi_plugin_protocolsmanager_emailconfig') as $uid => $list) {
-					echo '<option value="';
-					echo $list["recipients"]."|".$list["email_subject"]."|".$list["email_content"]."|".$list["send_user"];
-					echo '">';
-					echo $list["tname"]." - ".$list["recipients"];
-					echo '</option>';
+					$conca .= '<option value="';
+					$conca .= $list["recipients"]."|".$list["email_subject"]."|".$list["email_content"]."|".$list["send_user"];
+					$conca .= '">';
+					$conca .= $list["tname"]." - ".$list["recipients"];
+					$conca .= '</option>';
+				}
+				$conca .= '</select><br><br><input type="submit" name="send" class="submit" value='.__("Send").'>';
+
+				if(!empty($author))
+				{
+					$conca .= '<input type="hidden" name="author" value="'.$author.'">';
 				}
 
-				echo "</select><br><br><input type='submit' name='send' class='submit' value=".__('Send').">";
-				echo "<input type='hidden' name='author' value='$author'>";
-				echo "<input type='hidden' name='owner' value='$owner'>";
-				Html::closeForm();
-				echo "</div>"; 
+				if(!empty($owner))
+				{
+					$conca .= '<input type="hidden" name="owner" value="'.$owner.'">';
+				}
+				
+				$conca .= '</form>';
+				// Html::closeForm();
+
+				$conca .= '</div>';
+				$conca .= '</div>';
+				$conca .= '</div>';
+				$conca .= '</div>';
+				$conca .= '</div>';
+				echo $conca;
+				// fin du popup
 				
 				//add custom row
 				echo "<div class='spaced'><button class='addNewRow' id='addNewRow' style='background-color:#8ec547; color:#fff; cursor:pointer; font:bold 12px Arial, Helvetica; border:0; padding:5px;'>Add Custom Fields</button></div>";
 				
 				echo "<div class='spaced'>";
 				echo "<form method='post' name='docs_form' action='".$CFG_GLPI["root_doc"]."/plugins/protocolsmanager/front/generate.form.php'>";
-				echo "<table class='tab_cadre_fixe'><td style='width:5%'><img src='../pics/arrow-left-top.png'></td><td style='width:5%'>";
+				echo "<table class='tab_cadre_fixe'><td style='width:5%'><img src='".$CFG_GLPI["root_doc"]."/plugins/protocolsmanager/img/arrow-left-top.png'></td><td style='width:5%'>";
 				echo "<input type='submit' name='delete' class='submit' value=".__('Delete').">";
 				echo "</td><td style='width:90%'></table>";
 				echo "<table class='tab_cadre_fixehov' id='myTable'>";
@@ -275,16 +309,17 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				$header2 .= "<th>".__('Comment')."</th>";
 				$header2 .= "<th>".__('Send email')."</th></tr>";
 				echo $header2;
-				
+
 				self::getAllForUser($id);
 				echo "</table>";
 				Html::closeForm();
 				echo "</div>";
 				
 				return true;
-	
+			
 		}
 		
+		// TODO
 		//show user's generated documents
 		static function getAllForUser($id) {
 			global $DB, $CFG_GLPI;
@@ -327,164 +362,194 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 					
 					echo "<td class='center'>";
 					echo $Doc->getField("comment");
-					echo "</td>";					
+					echo "</td>";
 					
 					echo "<td class='center'>";
 					echo "<span class='docid' style='display:none'>".$exports['document_id']."</span>";
 					echo "<a class='openDialog' style='background-color:#8ec547; color:#fff; cursor:pointer; font:bold 12px Arial, Helvetica; border:0; padding:5px;' href='#'>".__('Send')."</a>";
 					echo "</td>";
-
+					
 					
 					echo "</tr>";
 
 					$doc_counter++;
 				}
 		}
-
 		
 		//make PDF and save to DB
-		static function makeProtocol() {
-			
+		static function makeProtocol() 
+		{
 			global $DB, $CFG_GLPI;
-			
-			$number = $_POST['number'];
-			$type_name = $_POST['type_name'];
-			$man_name = $_POST['man_name'];
-			$mod_name = $_POST['mod_name'];
-			$serial = $_POST['serial'];
-			$otherserial = $_POST['otherserial'];
-			$item_name = $_POST['item_name'];
-			$owner = $_POST['owner'];
-			$author = $_POST['author'];
-			$doc_no = $_POST['list'];
-			$id = $_POST['user_id'];
-			$notes = $_POST['notes'];
-			
-			$prot_num = self::getDocNumber();
-			
-			$req = $DB->request(
-				'glpi_plugin_protocolsmanager_config',
-				['id' => $doc_no ]);
-				
-			if ($row = $req->next()) {
-				$content = nl2br($row["content"]);
-				$content = str_replace("{cur_date}", date("d.m.Y"), $content);
-				$content = str_replace("{owner}", $owner, $content);
-				$content = str_replace("{admin}", $author, $content);
-				$upper_content = nl2br($row["upper_content"]);
-				$upper_content = str_replace("{cur_date}", date("d.m.Y"), $upper_content);
-				$upper_content = str_replace("{owner}", $owner, $upper_content);
-				$upper_content = str_replace("{admin}", $author, $upper_content);
-				$footer = nl2br($row["footer"]);
-				$title = $row["name"];
-				$full_img_name = $row["logo"];
-				$font = $row["font"];
-				$fontsize = $row["fontsize"];
-				$city = $row["city"];
-				$serial_mode = $row["serial_mode"];
-				$orientation = $row["orientation"];
-				$breakword = $row["breakword"];
-				$email_mode = $row["email_mode"];
-				$email_template = $row["email_template"];
-			}
-			
-			$req = $DB->request(
-				'glpi_plugin_protocolsmanager_emailconfig',
-				['id' => $email_template ]);
-				
-			if ($row = $req->next()) {
-				$send_user = $row["send_user"];
-				$email_subject = $row["email_subject"];
-				$email_content = $row["email_content"];
-				$recipients = $row["recipients"];
-			}
-			
-			$comments = $_POST['comments'];
-		
-			if (!isset($font) || empty($font)) {
-				$font = 'dejavusans';
-			}
 
-			if (!isset($fontsize) || empty($fontsize)) {
-				$fontsize = '9';
-			}				
-			
-			if (!isset($city) || empty($city)) {
-				$city = '';
-			}			
-			
-			if (!isset($email_content) || empty($email_content)) {
-				$email_content = '';
-			}
-			$email_content = str_replace("{owner}", $owner, $email_content);
-			$email_content = str_replace("{admin}", $author, $email_content);
-			$email_content = str_replace("{cur_date}", date("d.m.Y"), $email_content);
-			
-			if (!isset($email_subject) || empty($email_subject)) {
-				$email_subject = '';
-			}
-			
-			$email_subject = str_replace("{owner}", $owner, $email_subject);
-			$email_subject = str_replace("{admin}", $author, $email_subject);
-			$email_subject = str_replace("{cur_date}", date("d.m.Y"), $email_subject);
+			// if(isset($_POST['number'])) {
 
-			if (!isset($recipients) || empty($recipients)) {
-				$recipients = '';
-			}			
-			
-			//change margin if no image
-			if (!isset($full_img_name) || empty($full_img_name)) {
-				$backtop = "20mm";
-				$islogo = 0;
-			} else {
-				$logo = GLPI_ROOT.'/files/_pictures/'.$full_img_name;
-				$backtop = "40mm";
-				$islogo = 1;
-			}
-			
-			
-			ob_start();
-			include dirname(__FILE__).'/template.php';
-			$html = ob_get_clean();
-			$options = new Options();
-			$options -> set('defaultFont', $font);
-			$html2pdf = new Dompdf($options);
-			$html2pdf->loadHtml($html);
-			$html2pdf->setPaper('A4', $orientation);
-			$html2pdf->render();
-			
-			$doc_name = $prot_num."-".date('mdY').'.pdf';	
-			$output = $html2pdf->output();
-			file_put_contents(GLPI_UPLOAD_DIR .'/'.$doc_name, $output);
-			
-			$doc_id = self::createDoc($doc_name, $notes, $id);
-			
-			if ($email_mode == 1) {
+				$number = $_POST['number'];
+				$type_name = $_POST['type_name'];
+				$man_name = $_POST['man_name'];
+				$mod_name = $_POST['mod_name'];
+				$serial = $_POST['serial'];
+				$otherserial = $_POST['otherserial'];
+				$item_name = $_POST['item_name'];
+				$owner = $_POST['owner'];
+				$author = $_POST['author'];
+				$doc_no = $_POST['list'];
+				$id = $_POST['user_id'];
+				$notes = $_POST['notes'];
 				
-				self::sendMail($doc_id, $send_user, $email_subject, $email_content, $recipients, $id);
+				$prot_num = self::getDocNumber();
+
+				$req = "SELECT *
+						FROM glpi_plugin_protocolsmanager_config
+						WHERE id = $doc_no";
+
+				$res = $DB->query($req);
 				
-			}
-			
-			$gen_date = date('Y-m-d H:i:s');
-			
-			$DB->insert('glpi_plugin_protocolsmanager_protocols', [
-				'name' => $doc_name,
-				'gen_date' => $gen_date,
-				'author' => $author,
-				'user_id' => $id,
-				'document_id' => $doc_id,
-				'document_type' => $title
-				]
-			);
+					
+				if ($row = $DB->fetchAssoc($res)) {
+					$content = nl2br($row["content"]);
+					$content = str_replace("{cur_date}", date("d.m.Y"), $content);
+					$content = str_replace("{owner}", $owner, $content);
+					$content = str_replace("{admin}", $author, $content);
+					$upper_content = nl2br($row["upper_content"]);
+					$upper_content = str_replace("{cur_date}", date("d.m.Y"), $upper_content);
+					$upper_content = str_replace("{owner}", $owner, $upper_content);
+					$upper_content = str_replace("{admin}", $author, $upper_content);
+					$footer = nl2br($row["footer"]);
+					$title = $row["name"];
+					$full_img_name = $row["logo"];
+					$font = $row["font"];
+					$fontsize = $row["fontsize"];
+					$city = $row["city"];
+					$serial_mode = $row["serial_mode"];
+					$orientation = $row["orientation"];
+					$breakword = $row["breakword"];
+					$email_mode = $row["email_mode"];
+					$email_template = $row["email_template"];
+				}
 				
+				$req2 = "SELECT *
+						FROM glpi_plugin_protocolsmanager_emailconfig
+						WHERE id = $email_template";
+
+				$res2 = $DB->query($req2);
+				
+				if ($row = $DB->fetchAssoc($res2)) {
+					$send_user = $row["send_user"];
+					$email_subject = $row["email_subject"];
+					$email_content = $row["email_content"];
+					$recipients = $row["recipients"];
+				}
+				
+				$comments = $_POST['comments'];
+				
+				if (!isset($font) || empty($font)) {
+					$font = 'dejavusans';
+				}
+	
+				if (!isset($fontsize) || empty($fontsize)) {
+					$fontsize = '9';
+				}
+				
+				if (!isset($city) || empty($city)) {
+					$city = '';
+				}
+				
+				if (!isset($email_content) || empty($email_content)) {
+					$email_content = '';
+				}
+				$email_content = str_replace("{owner}", $owner, $email_content);
+				$email_content = str_replace("{admin}", $author, $email_content);
+				$email_content = str_replace("{cur_date}", date("d.m.Y"), $email_content);
+				
+				if (!isset($email_subject) || empty($email_subject)) {
+					$email_subject = '';
+				}
+				
+				$email_subject = str_replace("{owner}", $owner, $email_subject);
+				$email_subject = str_replace("{admin}", $author, $email_subject);
+				$email_subject = str_replace("{cur_date}", date("d.m.Y"), $email_subject);
+	
+				if (!isset($recipients) || empty($recipients)) {
+					$recipients = '';
+				}
+				
+				//change margin if no image
+				if (!isset($full_img_name) || empty($full_img_name)) {
+					$backtop = "20mm";
+					$islogo = 0;
+				} else {
+					$logo = GLPI_ROOT.'/files/_pictures/'.$full_img_name;
+					$backtop = "40mm";
+					$islogo = 1;
+				}
+				
+				// debut buffer
+				// $file_content ="";
+				ob_start();
+
+				include dirname(__FILE__).'/template.php';
+
+				// var_dump($file_content);
+				$file_content = ob_get_contents();
+
+				// clean le buffer, il y'a plusieurs layers
+				// cf https://stackoverflow.com/questions/10352964/php-buffer-doesnt-stop-after-ob-end-clean
+				while (@ob_end_clean()) {  
+					// do nothing   
+				}
+
+
+				// echo ob_get_level();
+				// echo $file_content;
+				// var_dump($file_content);
+
+				$options = new Options();
+				$options -> set('defaultFont', $font);
+
+				$html2pdf = new Dompdf($options);
+				$html2pdf->loadHtml($file_content);
+				$html2pdf->setPaper('A4', $orientation);
+				$html2pdf->render();
+
+				$doc_name = $prot_num."-".date('mdY').'.pdf';
+				$output = $html2pdf->output();
+
+				file_put_contents(GLPI_UPLOAD_DIR .'/'.$doc_name, $output);
+				
+				$doc_id = self::createDoc($doc_name, $notes, $id);
+				
+				if ($email_mode == 1) {
+					
+					self::sendMail($doc_id, $send_user, $email_subject, $email_content, $recipients, $id);
+					
+				}
+				
+				$gen_date = date('Y-m-d H:i:s');
+				
+				$DB->insert('glpi_plugin_protocolsmanager_protocols', [
+					'name' => $doc_name,
+					'gen_date' => $gen_date,
+					'author' => $author,
+					'user_id' => $id,
+					'document_id' => $doc_id,
+					'document_type' => $title
+					]
+				);
+					
+
+			// }
+			
 		}
-		
 		
 		static function getDocNumber() {
 			global $DB;
 			
-			$req = $DB->request('SELECT MAX(id) as max FROM glpi_plugin_protocolsmanager_protocols');
-			if ($row = $req->next()) {
+			$req = "SELECT MAX(id) as max
+			FROM glpi_plugin_protocolsmanager_protocols";
+
+			$res = $DB->query($req);
+
+			if ($row =  $DB->fetchAssoc($res)) {
 				$nextnum = $row["max"];
 				if (!$nextnum) {
 					return 1;
@@ -499,13 +564,19 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 		//create GLPI document
 		static function createDoc($doc_name, $notes, $id) {
 			global $DB, $CFG_GLPI;
+
+			$req = "SELECT *
+					FROM glpi_users
+					WHERE id = $id";	
+					
+			$res = $DB->query($req);
 			
-			$req = $DB->request(
-					'glpi_users',
-					['id' => $id ]);
-			
-			if ($row = $req->next()) {
+			if ($row = $DB->fetchAssoc($res)) {
 				$entity = $row["entities_id"];
+			}
+
+			if (!Session::haveAccessToEntity($entity)) {
+				$entity = Session::getActiveEntity();
 			}
 			
 			$input = [];
@@ -574,7 +645,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			
 			if ($send_user == 1) {
 				$nmail->AddAddress($owner_email);
-			}			
+			}
 			
 			foreach($recipients_array as $recipient) {
 				
@@ -662,12 +733,12 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			
 			if ($send_user == 1) {
 				$nmail->AddAddress($owner_email);
-			}			
+			}
 			
 			foreach($recipients_array as $recipient) {
 				
 				$nmail->AddAddress($recipient); //do konfiguracji
-			}			
+			}
 			
 			$req = $DB->request(
 					'glpi_documents',
@@ -702,7 +773,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			
 		}
 		
-
+	
 }
 
 
@@ -710,81 +781,92 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 
 <script>
 
-
-$(function(){
-	$(".man_recs").prop('disabled', true);
-	$('.send_type').click(function(){
-		if($(this).prop('id') == "manually"){
-			$(".man_recs").prop('disabled', false);
-			$("#auto_recs").prop('disabled', true);
-		}else{
-			$(".man_recs").prop('disabled', true);
-			$("#auto_recs").prop('disabled', false);
-		}
+	// a CHANGER jqueryui
+	$(function(){
+		$(".man_recs").prop('disabled', true);
+		$('.send_type').click(function(){
+			if($(this).prop('id') == "manually"){
+				$(".man_recs").prop('disabled', false);
+				$("#auto_recs").prop('disabled', true);
+			}else{
+				$(".man_recs").prop('disabled', true);
+				$("#auto_recs").prop('disabled', false);
+			}
+		});
 	});
-});
 
-$(function(){
-	
-	$(".dialog").dialog({ autoOpen: false, modal: true, height: 500, width: 500 });
- 
-	$("#myTable").on('click','.openDialog',function(){
-         // get the current row
-        var currentRow=$(this).closest("tr"); 
-         
-        var docid=currentRow.find(".docid").html(); // get current row 1st table cell TD value
+	// ça utilisait jqueryUI, glpi ne l'utilise plus cependant
 
-		$('#dialogVal').val(docid);
-		$(".dialog").dialog('open');
+	$(function(){
 		
-		});        
- 
-});
+		$("#myTable").on('click','.openDialog',function(){
 
-$(function(){
-    $('.checkall').on('click', function() {
-        $('.child').prop('checked', this.checked)
-    });
-});
+			// get the current row
+			var currentRow = $(this).closest("tr");
 
-$(function(){
-    $('.checkalldoc').on('click', function() {
-        $('.docchild').prop('checked', this.checked)
-    });
-});
+			// get current row 1st table cell TD value
+			var docid = currentRow.find(".docid").html(); 
+			
+			$('#dialogVal').val(docid);
 
-$(function() {
+			// on affiche la pop-up
+			$("#motus").modal('show');
+			
+		});
+			
+	});
 
-	var counter = $('.child').length;
-	
-	var ctr = 0;
-	
-	    $("#addNewRow").on("click", function () {
-        var newRow = $("<tr class='tab_bg_1'>");
-        var cols = "";
+	// OK à retoucher pour que ça soit une option dans le plugin ?
+	$(function(){
+
+		// Par défaut on coche les cases
+		$('.checkall').prop('checked', true);
+		$('.child').prop('checked', this)
+
+		// Quand on clique sur le parent ça change toutes les cases
+		$('.checkall').on('click', function() {
+		$('.child').prop('checked', this.checked)
+		});
+	});
+
+		// OK
+	$(function(){
+		$('.checkalldoc').on('click', function() {
+			$('.docchild').prop('checked', this.checked)
+		});
+	});
+
+		// a CHANGER jqueryui
+	$(function() {
+
+			var counter = $('.child').length;
+			
+			var ctr = 0;
+			
+			$("#addNewRow").on("click", function () {
+				var newRow = $("<tr class='tab_bg_1'>");
+			var cols = "";
+			
+			cols += '<td><input type="button" class="ibtnDel" value="&#10006" style="background-color:red; font-size:9px;"></td>';
+			cols += '<td class="center"><input type="text" style="width:80% " name="type_name[]"></td>';
+			cols += '<td class="center"><input type="text" style="width:90% "name="man_name[]"></td>';
+			cols += '<td class="center"><input type="text" style="width:90% "name="item_name[]"></td>';
+			cols += '<td class="center"><input type="text" style="width:90% "name="serial[]"></td>';
+			cols += '<td class="center"><input type="text" style="width:90% "name="otherserial[]"></td>';
+			cols += '<td class="center"><input type="text" style="width:90% "name="comments[]"><input type="hidden" name="number[]" value="' + counter + '"></td>';
+			
+			newRow.append(cols);
+			$("#additional_table").append(newRow);
+			counter++;
+			ctr++;
+		});
 		
-		cols += '<td><input type="button" class="ibtnDel" value="&#10006" style="background-color:red; font-size:9px;"></td>';
-        cols += '<td class="center"><input type="text" style="width:80% " name="type_name[]"></td>';
-        cols += '<td class="center"><input type="text" style="width:90% "name="man_name[]"></td>';
-        cols += '<td class="center"><input type="text" style="width:90% "name="item_name[]"></td>';
-        cols += '<td class="center"><input type="text" style="width:90% "name="serial[]"></td>';
-        cols += '<td class="center"><input type="text" style="width:90% "name="otherserial[]"></td>';
-        cols += '<td class="center"><input type="text" style="width:90% "name="comments[]"><input type="hidden" name="number[]" value="' + counter + '"></td>';
-
-        newRow.append(cols);
-        $("#additional_table").append(newRow);
-		counter++;
-        ctr++;
-    });
-	
-    $("#additional_table").on("click", ".ibtnDel", function (event) {
-        $(this).closest("tr").remove();       
-        ctr -= 1
-    });
+		$("#additional_table").on("click", ".ibtnDel", function (event) {
+			$(this).closest("tr").remove();
+			ctr -= 1
+		});
 
 
-});
-
-
+	});
 
 </script>

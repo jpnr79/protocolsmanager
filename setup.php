@@ -6,7 +6,7 @@ function plugin_version_protocolsmanager() {
                 'author'         => 'Mateusz Nitka',
                 'license'        => 'GPLv3+',
                 'homepage'       => 'https://github.com/mateusznitka/protocolsmanager',
-                'minGlpiVersion' => '9.3');
+                'minGlpiVersion' => '10.0');
 }
 
 function plugin_protocolsmanager_check_config() {
@@ -15,10 +15,10 @@ function plugin_protocolsmanager_check_config() {
  
 
 function plugin_protocolsmanager_check_prerequisites() { 
-		if (GLPI_VERSION>=9.3){
+		if (GLPI_VERSION>=10.0){
                 return true;
         } else {
-                echo "GLPI version NOT compatible. Requires GLPI 9.3";
+                echo "GLPI version NOT compatible. Requires GLPI 10.0";
         }
 }
 
@@ -37,6 +37,27 @@ function plugin_init_protocolsmanager() {
 	
 	$PLUGIN_HOOKS['add_css']['protocolsmanager'] = 'css/styles.css';
 	
+        // add entry to configuration menu
+        $PLUGIN_HOOKS["menu_toadd"]['protocolsmanager'] = 
+        ['config' => 'PluginProtocolsmanagerMenu'];
+
+        // Plugin::registerClass(
+        //         'PluginProtocolsmanagerMenu', [
+        //            'addtabon' => [
+        //               'config'
+        //            ]
+        //         ]
+        //      );
+
+        // Config page
+        if (Session::haveRight('config', READ)) {
+                $PLUGIN_HOOKS['config_page']['protocolsmanager'] = 'front/config.form.php';
+        }
+
+        // add tabs to itemtypes
+        //  Plugin::registerClass('PluginProtocolsmanagerContainer', ['addtabon' => array_unique(PluginProtocolsmanagerContainer::getEntries())]);
+
+        // $PLUGIN_HOOKS["menu_toadd"]['protocolsmanager'] = ['config' => 'PluginProtocolsmanagerContainer'];
 }
 
 ?>

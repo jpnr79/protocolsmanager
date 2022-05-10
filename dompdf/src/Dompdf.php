@@ -19,7 +19,6 @@ use HTML5_TreeBuilder;
 use Dompdf\Image\Cache;
 use Dompdf\Css\Stylesheet;
 use Dompdf\Helpers;
-error_reporting(E_ALL);
 
 /**
  * Dompdf - PHP5 HTML to PDF renderer
