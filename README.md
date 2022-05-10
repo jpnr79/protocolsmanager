@@ -1,3 +1,13 @@
+# Added Compatibility for GLPI 10
+I've updated dompdf also upgraded the previous code to be glpi 10 friendly.
+There is more improvement incoming.
+In the current version there is more verifications to prevent error occuring
+This version removed technicians feature from Wolvverine
+Also I am gonna add some features that will be pushed soon for instance :
+* Possibility to add in the template settings who generated the pdf (for instance IT division or Name of the technician)
+* A new tab on the Configuration page to directly access options of the plugin
+# ***END OF SUPPORT***
+Unfortunately, I don't have time to develop this project anymore. Feel free to fork it and develop it by yourself. Hope this functionality will be in GLPI core someday.
 # Protocols Manager
 GLPI Plugin to make PDF reports with user inventory.
 ## Features

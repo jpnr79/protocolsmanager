@@ -23,11 +23,12 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 			
 			if($data['plugin_conf']) {
 				$plugin_conf = $data['plugin_conf'];
-				return $plugin_conf;
 			}
 			else{
 				$plugin_conf = "";
 			}
+
+			return $plugin_conf;
 
 		}
 	}
