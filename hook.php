@@ -69,13 +69,15 @@ function plugin_protocolsmanager_install() {
 				  breakword int(2),
 				  email_mode int(2),
 				  email_template int(2),
+				  author_name varchar(255),
+				  author_state int(2),
 				  PRIMARY KEY (id)
 			   ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 			   
 		$DB->queryOrDie($query, $DB->error());
 	  
 		$query2 = "INSERT INTO glpi_plugin_protocolsmanager_config (
-					name, font, fontsize, content, footer, city, serial_mode, orientation, breakword)
+					name, font, fontsize, content, footer, city, serial_mode, orientation, breakword, author_name, author_state)
 					VALUES ('Equipment report',
 							'Roboto',
 							'9',
@@ -84,12 +86,18 @@ function plugin_protocolsmanager_install() {
 							'Example city',
 							1,
 							'Portrait',
+							1,
+							'Test Division',
 							1)";
 							
 		$DB->queryOrDie($query2, $DB->error());
 	}
 	
-		//update config table if upgrading from 1.0
+	/**
+	* UPDATES CONFIG TABLE FOR SCALABILITY
+	*/
+
+	//update config table if upgrading from 1.0
 	if (!$DB->FieldExists('glpi_plugin_protocolsmanager_config', 'orientation')) {
 		
 		$query = "ALTER TABLE glpi_plugin_protocolsmanager_config
@@ -106,7 +114,7 @@ function plugin_protocolsmanager_install() {
 		
 	}
 	
-		//update config table if upgrading from 1.1.2
+	//update config table if upgrading from 1.1.2
 	if (!$DB->FieldExists('glpi_plugin_protocolsmanager_config', 'fontsize')) {
 		
 		$query = "ALTER TABLE glpi_plugin_protocolsmanager_config
@@ -143,12 +151,24 @@ function plugin_protocolsmanager_install() {
 		
 	}
 	
-		//update config table if upgrading from 1.3
+	//update config table if upgrading from 1.3
 	if (!$DB->FieldExists('glpi_plugin_protocolsmanager_config', 'upper_content')) {
 		
 		$query = "ALTER TABLE glpi_plugin_protocolsmanager_config
 					ADD upper_content text
 						AFTER email_mode";
+		
+		$DB->queryOrDie($query, $DB->error());
+	}
+
+	//update config table if upgrading before 1.5.0
+	if (!$DB->FieldExists('glpi_plugin_protocolsmanager_config', 'author_name')) {
+		
+		$query = "ALTER TABLE glpi_plugin_protocolsmanager_config
+					ADD author_name varchar(255)
+						AFTER email_template
+					ADD author_state int(2)
+						AFTER author";
 		
 		$DB->queryOrDie($query, $DB->error());
 	}

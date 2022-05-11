@@ -76,6 +76,8 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 				$breakword = $row["breakword"];
 				$email_mode = $row["email_mode"];
 				$email_template = $row["email_template"];
+				$author_name = $row["author_name"];
+				$author_state = $row["author_state"];
 			}
 			
 		} else {
@@ -92,6 +94,8 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 			$breakword = 1;
 			$email_mode = 2;
 			$email_template = 1;
+			$author_name = '';
+			$author_state = 1;
 		}
 		
 		
@@ -220,7 +224,26 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 				echo '</option>';
 			}
 		echo "</select></td></tr>";
+		/**
+		 *
+		 */
+		echo "<tr><td>Sélectionner qui génère le pdf</td>";
+		
+		if($author_state == 2)
+		{
+			echo "<td><input type='radio' name='author_state' value='1'> ".__('The user who generates the document')."</td>";
+			echo "<td><input type='radio' name='author_state' value='2' checked='checked'> <input type='text' name='author_name' value='$author_name'/></td>";
 
+		}
+		else {
+			echo "<td><input type='radio' name='author_state' value='1' checked='checked'> ".__('The user who generates the document')."</td>";
+			echo "<td><input type='radio' name='author_state' value='2'> <input type='text' name='author_name' value='$author_name'/></td>";
+		}
+
+		echo "</tr>";
+		/**
+		*
+		*/
 		echo "</table>";
 		echo "<table class='tab_cadre_fixe'><td style='text-align:right;'><input type='submit' name='save' class='submit'></td>";
 		Html::closeForm();
@@ -273,7 +296,7 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 			$email_subject = '';
 			$email_content = '';
 			$recipients = '';
-			$email_edit_id=0;
+			$email_edit_id = 0;
 		}
 		
 		//email template edit
@@ -351,6 +374,8 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 				$email_template = $_POST["email_template"];
 			}
 			
+			$full_img_name = self::uploadImage();
+
 			if (isset($_POST['img_delete'])) {
 				
 				$DB->update('glpi_plugin_protocolsmanager_config', [
@@ -360,8 +385,19 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 					]
 				);
 			}
+
+			if (isset($_POST["author_name"])) {
+				$author_name = $_POST["author_name"];
+
+			}
+			if (isset($_POST["author_state"])) {
+				$author_state = $_POST["author_state"];
+
+			}
+
+			// TODO : concaténé quand les champs sont vides
+
 			
-			$full_img_name = self::uploadImage();
 			
 			//if new template
 			if ($mode == 0) {
@@ -379,7 +415,9 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 					'orientation' => $orientation,
 					'breakword' => $breakword,
 					'email_mode' => $email_mode,
-					'email_template' =>$email_template
+					'email_template' => $email_template,
+					'author_name' => $author_name,
+					'author_state' => $author_state
 					]
 				);
 			}
@@ -403,7 +441,9 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 							'orientation' => $orientation,
 							'breakword' => $breakword,
 							'email_mode' => $email_mode,
-							'email_template' =>$email_template
+							'email_template' =>$email_template,
+							'author_name' => $author_name,
+							'author_state' => $author_state
 						], [
 							'id' => $mode
 						]
@@ -438,7 +478,9 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 							'serial_mode' => $serial_mode,
 							'orientation' => $orientation,
 							'breakword' => $breakword,
-							'email_template' =>$email_template
+							'email_template' => $email_template,
+							'author_name' => $author_name,
+							'author_state' => $author_state
 						], [
 							'id' => $mode
 						]
@@ -457,7 +499,9 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 							'orientation' => $orientation,
 							'breakword' => $breakword,
 							'email_mode' => $email_mode,
-							'email_template' =>$email_template
+							'email_template' =>$email_template,
+							'author_name' => $author_name,
+							'author_state' => $author_state
 						], [
 							'id' => $mode
 						]

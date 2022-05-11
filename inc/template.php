@@ -366,7 +366,14 @@ footer
 	</tr>
 	<tr>
 		<td style="border: 1px solid black; width:50%; vertical-align:top; height: 20mm">
-			<?php echo $author; ?>
+		<?php 
+		if($author_state == 2) {
+			echo $author_name;
+		}
+		else {
+			echo $author;
+		}
+ 		?>
 		</td>
 		<td style="border: 1px solid black; width:50%; vertical-align:top; height: 20mm">
 			<?php echo $owner; ?>

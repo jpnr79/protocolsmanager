@@ -210,11 +210,12 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 								$Owner->getFromDB($id);
 								$Author = new User();
 								$Author->getFromDB(Session::getLoginUserID());
+								// il faut get le template utilisé
 								// getrawname remplacé https://github.com/glpi-project/glpi/blob/10.0/bugfixes/CHANGELOG.md
 								// il y avait aussi getRawName() mais je suis pas sur que ça soit vu le changelog
 								$owner = $Owner->getFriendlyName();
 								$author = $Author->getFriendlyName();
-								
+																
 								echo "<input type='hidden' name='owner' value ='$owner'>";
 								echo "<input type='hidden' name='author' value ='$author'>";
 								echo "<input type='hidden' name='type_name[]' value='$type_name'>";
@@ -392,6 +393,8 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				$item_name = $_POST['item_name'];
 				$owner = $_POST['owner'];
 				$author = $_POST['author'];
+				$author_name = $_POST['author_name'];
+				$author_state = $_POST['author_state'];
 				$doc_no = $_POST['list'];
 				$id = $_POST['user_id'];
 				$notes = $_POST['notes'];
@@ -425,6 +428,8 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 					$breakword = $row["breakword"];
 					$email_mode = $row["email_mode"];
 					$email_template = $row["email_template"];
+					$author_name = $row["author_name"];
+					$author_state = $row["author_state"];
 				}
 				
 				$req2 = "SELECT *
@@ -628,7 +633,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 					'glpi_documents',
 					['id' => $doc_id ]);
 			
-			if ($row = $req->next()) {
+			if ($row = $req->current()) {
 				$path = $row["filepath"];
 				$filename = $row["filename"];
 			}
@@ -639,7 +644,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 					'glpi_useremails',
 					['users_id' => $id, 'is_default' => 1]);
 					
-			if ($row2 = $req2->next()) {
+			if ($row2 = $req2->current()) {
 				$owner_email = $row2["email"];
 			}
 			
@@ -727,7 +732,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 					'glpi_useremails',
 					['users_id' => $id, 'is_default' => 1]);
 					
-			if ($row2 = $req2->next()) {
+			if ($row2 = $req2->current()) {
 				$owner_email = $row2["email"];
 			}
 			
@@ -744,7 +749,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 					'glpi_documents',
 					['id' => $doc_id ]);
 			
-			if ($row = $req->next()) {
+			if ($row = $req->current()) {
 				$path = $row["filepath"];
 				$filename = $row["filename"];
 			}
