@@ -227,16 +227,16 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 		/**
 		 *
 		 */
-		echo "<tr><td>Sélectionner qui génère le pdf</td>";
+		echo "<tr><td>".__('Select who should generate the pdf', 'protocolsmanager')."</td>";
 		
 		if($author_state == 2)
 		{
-			echo "<td><input type='radio' name='author_state' value='1'> ".__('The user who generates the document')."</td>";
+			echo "<td><input type='radio' name='author_state' value='1'> ".__('The user who generates the document', 'protocolsmanager')."</td>";
 			echo "<td><input type='radio' name='author_state' value='2' checked='checked'> <input type='text' name='author_name' value='$author_name'/></td>";
 
 		}
 		else {
-			echo "<td><input type='radio' name='author_state' value='1' checked='checked'> ".__('The user who generates the document')."</td>";
+			echo "<td><input type='radio' name='author_state' value='1' checked='checked'> ".__('The user who generates the document', 'protocolsmanager')."</td>";
 			echo "<td><input type='radio' name='author_state' value='2'> <input type='text' name='author_name' value='$author_name'/></td>";
 		}
 
