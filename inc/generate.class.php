@@ -47,6 +47,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 		//show plugin content
 		function showContent($item) {
 			global $DB, $CFG_GLPI;
+			
 			$id = $item->getField('id');
 			$type_user   = $CFG_GLPI['linkuser_types'];
 			$field_user  = 'users_id';
@@ -56,7 +57,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			echo "<form method='post' name='user_field".$rand."' id='user_field".$rand."' action=\"" . $CFG_GLPI["root_doc"] . "/plugins/protocolsmanager/front/generate.form.php\">";
 			echo "<table class='tab_cadre_fixe'><tr><td style ='width:25%'></td>";
 			echo "<td class='center' style ='width:25%'>";
-			echo "<select name='list' style='font-size:14px; width:95%'>";
+			echo "<select required name='list' style='font-size:14px; width:95%'>";
 				foreach ($doc_types = $DB->request('glpi_plugin_protocolsmanager_config',
 				['FIELDS' => ['glpi_plugin_protocolsmanager_config' => ['id', 'name']]]) as $uid => $list) {
 					echo '<option value="';
