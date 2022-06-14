@@ -18,19 +18,19 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 	static function checkRights() {
 		global $DB;
 		$active_profile = $_SESSION['glpiactiveprofile']['id'];
-		
-		foreach($DB->request('glpi_plugin_protocolsmanager_profiles', ['profile_id' => $active_profile]) as $data) {
-			
-			if($data['plugin_conf']) {
-				$plugin_conf = $data['plugin_conf'];
-			}
-			else{
-				$plugin_conf = "";
-			}
+		$req = $DB->request('glpi_plugin_protocolsmanager_profiles',
+		['profile_id' => $active_profile]);
+					
+        if($row = $req->current()) {
+            $plugin_conf = $row['plugin_conf'];
+        }
+        else{
+            $plugin_conf = "";
+        }
 
-			return $plugin_conf;
+        return $plugin_conf;
 
-		}
+
 	}
 	
 	static function displayContent() {
@@ -57,12 +57,11 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 			$edit_id = $_POST['edit_id'];
 			$mode = $edit_id;
 			
-			$query = "SELECT *
-					  FROM glpi_plugin_protocolsmanager_config
-					  WHERE id ='$edit_id'";
-			$res = $DB->query($query);
+			$req = $DB->request(
+				'glpi_plugin_protocolsmanager_config',
+				['id' => $edit_id ]);
 				
-			if ($row = $DB->fetchAssoc($res)) {
+			if ($row = $req->current()) {
 				$template_uppercontent = $row["upper_content"];
 				$template_content = $row["content"];
 				$template_footer = $row["footer"];
@@ -276,14 +275,11 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 			
 			$email_edit_id = $_POST['email_edit_id'];
 
-			$query = 
-				"SELECT *
-				FROM glpi_plugin_protocolsmanager_emailconfig
-				WHERE id ='$email_edit_id'";			
-
-			$res = $DB->query($query);
+			$req = $DB->request(
+				'glpi_plugin_protocolsmanager_emailconfig',
+				['id' => $email_edit_id ]);			
 				
-			if ($row = $DB->fetchAssoc($res)) {
+			if ($row = $req->current()) {
 				$tname = $row["tname"];
 				$send_user = $row["send_user"];
 				$email_subject = $row["email_subject"];

@@ -1,15 +1,10 @@
-# Added Compatibility for GLPI 10
-I've updated dompdf also upgraded the previous code to be glpi 10 friendly.
-There is more improvement incoming.
-In the current version there is more verifications to prevent error occuring
-This version removed technicians feature from Wolvverine
-Also I am gonna add some features that will be pushed soon for instance :
-* Possibility to add in the template settings who generated the pdf (for instance IT division or Name of the technician)
-* A new tab on the Configuration page to directly access options of the plugin
-# ***END OF SUPPORT***
-Unfortunately, I don't have time to develop this project anymore. Feel free to fork it and develop it by yourself. Hope this functionality will be in GLPI core someday.
 # Protocols Manager
 GLPI Plugin to make PDF reports with user inventory.
+**Only supports for glpi v10+ and PHP version 8.0+**
+**Removed parts of code using additionnal fields plugin**
+## Upcoming Features
+* Possibility to customize title of document with the name of the user
+* Menu to access easily to protocols Manager
 ## Features
 * Making PDFs with all or selected user inventory
 * Saving protocols in GLPI Documents
@@ -20,6 +15,9 @@ GLPI Plugin to make PDF reports with user inventory.
 * Showing serial number or inventory number in one or two columns
 * Possibility to add custom rows
 * Possibility to add notes to export
+## What's new in 1.5?
+* Now you can select in the template settings who generates the PDF (for instance IT division or Name of the technician)
+* Fixed some bugs
 ## What's new in 1.4?
 * New optional feature - sending emails with PDFs - automatically after generating PDF or manually in any moment
 * New text field in template above the table
@@ -30,8 +28,8 @@ GLPI Plugin to make PDF reports with user inventory.
 * Document is now assigned to default user's entity
 
 ## Compatibility
-GLPI 9.3 or higher
-PHP 7.1 or higher  
+GLPI 10.0 or higher
+PHP 8.0.15 or higher  
 ***NOTE:*** in GLPI 9.3.x, you have to modify /inc/generate.class.php - search and replace: **GLPI_UPLOAD_DIR** to **GLPI_TMP_DIR**.
 ## Installation
 1. Download and extract package

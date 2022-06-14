@@ -13,7 +13,6 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			return self::createTabEntry('Protocols manager');
 		}
 
-		// OK
 		static function displayTabContentForItem(CommonGLPI $item, $tabnum=1, $withtemplate=0) {
 			global $DB, $CFG_GLPI;
 			
@@ -27,26 +26,24 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			}
 		}
 		
-		// OK
 		//check if logged user have rights to plugin
 		static function checkRights() {
 			global $DB;
 			$active_profile = $_SESSION['glpiactiveprofile']['id'];
-
-			foreach($DB->request('glpi_plugin_protocolsmanager_profiles', ['profile_id' => $active_profile]) as $data) {
+			$req = $DB->request('glpi_plugin_protocolsmanager_profiles',
+			['profile_id' => $active_profile]);
 			
-				if($data['tab_access']) {
-					$tab_access = $data['tab_access'];
-					return $tab_access;
-				}
-				else{
-					$tab_access = "";
-				}
-	
+			if($row = $req->current()) {
+				$tab_access = $row['tab_access'];
 			}
+			else{
+				$tab_access = "";
+			}
+
+			return $tab_access;
+	
 		}
 		
-		// OK
 		//show plugin content
 		function showContent($item) {
 			global $DB, $CFG_GLPI;
@@ -78,8 +75,8 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			echo "<div class='spaced'><table class='tab_cadre_fixehov' id='additional_table'>";
 			$header = "<th width='10'><input type='checkbox' class='checkall' style='height:16px; width: 16px;'></th>";
 			$header .= "<th>".__('Type')."</th>";
-			$header .= "<th>".__('Manufacturer');
-			$header .= " ".__('Model')."</th>";
+			$header .= "<th>".__('Manufacturer')."</th>";
+			$header .= "<th>".__('Model')."</th>";
 			$header .= "<th>".__('Name')."</th>";
 			$header .= "<th>".__('Serial number')."</th>";
 			$header .= "<th>".__('Inventory number')."</th>";
@@ -108,10 +105,11 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 							$iterator_params .= " AND is_deleted = 0";
 						}
 
-						$item_iterator = $DB->query($iterator_params);
+						$item_iterator = $DB->request($iterator_params);
 						$type_name = $item->getTypeName();
+						$item_iterator->current();
 
-						while ($data = $DB->fetchAssoc($item_iterator)) {
+						foreach ($item_iterator as $data) {
 								$cansee = $item->can($data["id"], READ);
 								$link  = $data["name"];
 								if ($cansee) {
@@ -137,16 +135,24 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 									
 									$man_id = $data["manufacturers_id"];
 									
-									$req = "SELECT *
-											FROM glpi_manufacturers
-											WHERE id = $man_id";
-										
-									$resq = $DB->query($req);
-									
-									if ($row = $DB->fetchAssoc($resq)) {
+									$req = $DB->request(
+										'glpi_manufacturers',
+										['id' => $man_id ]);
+																			
+									if ($row = $req->current()) {
 										$man_name = $row["name"];
 									}
 									
+									$man_name = explode(' ',trim($man_name))[0];
+									echo $man_name;
+								}
+								else {
+									echo '&nbsp;';
+									$man_name = '';
+								}
+								echo "</td>";
+								echo "<td class='center'>";
+
 									$modeltypes = ["computer", "phone", "monitor", "networkequipment", "printer", "peripheral"];
 									$mod_name = '';
 									
@@ -154,27 +160,20 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 										if(isset($data[$prefix.'models_id']) && !empty($data[$prefix.'models_id'])) {
 											$mod_id = $data[$prefix.'models_id'];
 
-											$req2 = "SELECT *
-											FROM glpi_".$prefix."models
-											WHERE id = $man_id";
-
-											$resq2 = $DB->query($req2);
+											$req2 = $DB->request(
+												'glpi_'.$prefix.'models',
+												['id' => $mod_id ]);
  
-											if ($row2 = $DB->fetchAssoc($resq2)) {
+											if ($row2 = $req2->current()) {
 												$mod_name = $row2["name"];
 											}
+											echo $mod_name;
 										}
+										else {
+											echo '&nbsp;';
+											$mod_name = '';
+										}	
 									}
-									
-									$man_name = explode(' ',trim($man_name))[0];
-									echo $man_name.' '.$mod_name;
-									
-								}
-								else {
-									echo '&nbsp;';
-									$man_name = '';
-									$mod_name = '';
-								}
 								echo "</td>";
 								echo "<td class='center'>$link</td>";
 								echo "<td class='center'>";
@@ -203,8 +202,10 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 								if (isset($data["name"]) && !empty($data["name"])) {
 									$item_name = $data["name"];
 								}
-								else
+								else {
+									echo '&nbsp;';
 									$item_name = '';
+								}
 								
 								$Owner = new User();
 								$Owner->getFromDB($id);
@@ -401,14 +402,11 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				
 				$prot_num = self::getDocNumber();
 
-				$req = "SELECT *
-						FROM glpi_plugin_protocolsmanager_config
-						WHERE id = $doc_no";
-
-				$res = $DB->query($req);
-				
+				$req = $DB->request(
+					'glpi_plugin_protocolsmanager_config',
+					['id' => $doc_no ]);
 					
-				if ($row = $DB->fetchAssoc($res)) {
+				if ($row = $req->current()) {
 					$content = nl2br($row["content"]);
 					$content = str_replace("{cur_date}", date("d.m.Y"), $content);
 					$content = str_replace("{owner}", $owner, $content);
@@ -431,18 +429,16 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 					$author_name = $row["author_name"];
 					$author_state = $row["author_state"];
 				}
-				
-				$req2 = "SELECT *
-						FROM glpi_plugin_protocolsmanager_emailconfig
-						WHERE id = $email_template";
 
-				$res2 = $DB->query($req2);
+				$req2 = $DB->request(
+					'glpi_plugin_protocolsmanager_emailconfig',
+					['id' => $email_template ]);
 				
-				if ($row = $DB->fetchAssoc($res2)) {
-					$send_user = $row["send_user"];
-					$email_subject = $row["email_subject"];
-					$email_content = $row["email_content"];
-					$recipients = $row["recipients"];
+				if ($row2 = $req2->current()) {
+					$send_user = $row2["send_user"];
+					$email_subject = $row2["email_subject"];
+					$email_content = $row2["email_content"];
+					$recipients = $row2["recipients"];
 				}
 				
 				$comments = $_POST['comments'];
@@ -549,12 +545,9 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 		static function getDocNumber() {
 			global $DB;
 			
-			$req = "SELECT MAX(id) as max
-			FROM glpi_plugin_protocolsmanager_protocols";
+			$req = $DB->request('SELECT MAX(id) as max FROM glpi_plugin_protocolsmanager_protocols');
 
-			$res = $DB->query($req);
-
-			if ($row =  $DB->fetchAssoc($res)) {
+			if ($row = $req->current()) {
 				$nextnum = $row["max"];
 				if (!$nextnum) {
 					return 1;
@@ -570,13 +563,11 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 		static function createDoc($doc_name, $notes, $id) {
 			global $DB, $CFG_GLPI;
 
-			$req = "SELECT *
-					FROM glpi_users
-					WHERE id = $id";	
-					
-			$res = $DB->query($req);
+			$req = $DB->request(
+				'glpi_users',
+				['id' => $id ]);	
 			
-			if ($row = $DB->fetchAssoc($res)) {
+			if ($row = $req->current()) {
 				$entity = $row["entities_id"];
 			}
 
@@ -630,8 +621,8 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			$recipients_array = explode(';',$recipients);
 			
 			$req = $DB->request(
-					'glpi_documents',
-					['id' => $doc_id ]);
+				'glpi_documents',
+				['id' => $doc_id ]);
 			
 			if ($row = $req->current()) {
 				$path = $row["filepath"];
@@ -786,7 +777,6 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 
 <script>
 
-	// a CHANGER jqueryui
 	$(function(){
 		$(".man_recs").prop('disabled', true);
 		$('.send_type').click(function(){
@@ -834,14 +824,13 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 		});
 	});
 
-		// OK
 	$(function(){
 		$('.checkalldoc').on('click', function() {
 			$('.docchild').prop('checked', this.checked)
 		});
 	});
 
-		// a CHANGER jqueryui
+	// a CHANGER jqueryui
 	$(function() {
 
 			var counter = $('.child').length;
