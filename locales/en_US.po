@@ -21,3 +21,15 @@ msgstr "Select who should generate the pdf"
 #: inc/config.class.php:234
 msgid "The user who generates the document"
 msgstr "The user who generates the document"
+
+#: inc/config.class.php:148
+msgid "Document title"
+msgstr "Document title"
+
+#: inc/config.class.php:149
+msgid "You can use {owner} here."
+msgstr "You can use {owner} here."
+
+#: inc/config.class.php:182
+msgid "You can use {owner} or {admin} here."
+msgstr "You can use {owner} or {admin} here."
