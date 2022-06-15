@@ -1,6 +1,6 @@
 # Protocols Manager
 GLPI Plugin to make PDF reports with user inventory.  
-**Only supports for glpi v10+ and PHP version 8.0+** 
+**Only supports for glpi v10.0 and PHP version 8.0.15** 
 **Removed parts of code using additionnal fields plugin**
 ## Upcoming Features
 * Menu to access easily to protocols Manager
@@ -37,8 +37,8 @@ GLPI Plugin to make PDF reports with user inventory.
 * Fixed some bugs
 
 ## Compatibility
-GLPI 10.0 or higher
-PHP 8.0.15 or higher  
+GLPI 10.0
+PHP 8.0.15
 ***NOTE:*** in GLPI 9.3.x, you have to modify /inc/generate.class.php - search and replace: **GLPI_UPLOAD_DIR** to **GLPI_TMP_DIR**.
 ## Installation
 1. Download and extract package
