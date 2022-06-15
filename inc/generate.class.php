@@ -47,6 +47,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 		//show plugin content
 		function showContent($item) {
 			global $DB, $CFG_GLPI;
+			
 			$id = $item->getField('id');
 			$type_user   = $CFG_GLPI['linkuser_types'];
 			$field_user  = 'users_id';
@@ -56,7 +57,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			echo "<form method='post' name='user_field".$rand."' id='user_field".$rand."' action=\"" . $CFG_GLPI["root_doc"] . "/plugins/protocolsmanager/front/generate.form.php\">";
 			echo "<table class='tab_cadre_fixe'><tr><td style ='width:25%'></td>";
 			echo "<td class='center' style ='width:25%'>";
-			echo "<select name='list' style='font-size:14px; width:95%'>";
+			echo "<select required name='list' style='font-size:14px; width:95%'>";
 				foreach ($doc_types = $DB->request('glpi_plugin_protocolsmanager_config',
 				['FIELDS' => ['glpi_plugin_protocolsmanager_config' => ['id', 'name']]]) as $uid => $list) {
 					echo '<option value="';
@@ -383,8 +384,6 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 		{
 			global $DB, $CFG_GLPI;
 
-			// if(isset($_POST['number'])) {
-
 				$number = $_POST['number'];
 				$type_name = $_POST['type_name'];
 				$man_name = $_POST['man_name'];
@@ -393,9 +392,8 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				$otherserial = $_POST['otherserial'];
 				$item_name = $_POST['item_name'];
 				$owner = $_POST['owner'];
-				$author = $_POST['author'];
-				$author_name = $_POST['author_name'];
-				$author_state = $_POST['author_state'];
+				$author = $_POST['author'];				
+				
 				$doc_no = $_POST['list'];
 				$id = $_POST['user_id'];
 				$notes = $_POST['notes'];
@@ -416,7 +414,9 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 					$upper_content = str_replace("{owner}", $owner, $upper_content);
 					$upper_content = str_replace("{admin}", $author, $upper_content);
 					$footer = nl2br($row["footer"]);
-					$title = $row["name"];
+					$title = $row["title"];
+					$title = str_replace("{owner}", $owner, $title);
+					$title_template = $row["name"];
 					$full_img_name = $row["logo"];
 					$font = $row["font"];
 					$fontsize = $row["fontsize"];
@@ -526,19 +526,17 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				}
 				
 				$gen_date = date('Y-m-d H:i:s');
-				
+				// var_dump($title);
+				// die();
 				$DB->insert('glpi_plugin_protocolsmanager_protocols', [
 					'name' => $doc_name,
 					'gen_date' => $gen_date,
 					'author' => $author,
 					'user_id' => $id,
 					'document_id' => $doc_id,
-					'document_type' => $title
+					'document_type' => $title_template
 					]
 				);
-					
-
-			// }
 			
 		}
 		

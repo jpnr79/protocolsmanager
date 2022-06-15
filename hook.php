@@ -25,37 +25,12 @@ function plugin_protocolsmanager_install() {
 		$DB->query($query) or die($DB->error());
 	}
 	
-	//update profiles table if updating from 0.8 	
-	if (!$DB->FieldExists('glpi_plugin_protocolsmanager_profiles', 'plugin_conf')) {
-		
-		$query = "DROP TABLE glpi_plugin_protocolsmanager_profiles";
-		
-		$DB->query($query) or die($DB->error());
-		
-		$query = "CREATE TABLE glpi_plugin_protocolsmanager_profiles (
-					id int(11) NOT NULL auto_increment,
-					profile_id int(11),
-					plugin_conf char(1) collate utf8_unicode_ci default NULL,
-					tab_access char(1) collate utf8_unicode_ci default NULL,
-					make_access char(1) collate utf8_unicode_ci default NULL,
-					delete_access char(1) collate utf8_unicode_ci default NULL,
-					PRIMARY KEY  (`id`)
-				  ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-
-		$DB->query($query) or die($DB->error());
-
-		$id = $_SESSION['glpiactiveprofile']['id'];
-		$query = "INSERT INTO glpi_plugin_protocolsmanager_profiles (profile_id, plugin_conf, tab_access, make_access, delete_access) VALUES ('$id','w', 'w', 'w', 'w')";
-
-		$DB->query($query) or die($DB->error());
-	}
-		
-	
 	if (!$DB->tableExists('glpi_plugin_protocolsmanager_config')) {
       
 		$query = "CREATE TABLE glpi_plugin_protocolsmanager_config (
 				  id INT(11) NOT NULL auto_increment,
 				  name VARCHAR(255),
+				  title varchar(255),
 				  font varchar(255),
 				  fontsize varchar(255),
 				  logo varchar(255),
@@ -68,6 +43,7 @@ function plugin_protocolsmanager_install() {
 				  orientation varchar(10),
 				  breakword int(2),
 				  email_mode int(2),
+				  upper_content text,
 				  email_template int(2),
 				  author_name varchar(255),
 				  author_state int(2),
@@ -77,8 +53,9 @@ function plugin_protocolsmanager_install() {
 		$DB->queryOrDie($query, $DB->error());
 	  
 		$query2 = "INSERT INTO glpi_plugin_protocolsmanager_config (
-					name, font, fontsize, content, footer, city, serial_mode, orientation, breakword, author_name, author_state)
+					name, title, font, fontsize, content, footer, city, serial_mode, orientation, breakword, email_mode, author_name, author_state)
 					VALUES ('Equipment report',
+							'Certificate of delivery of {owner}',
 							'Roboto',
 							'9',
 							'User: \n I have read the terms of use of IT equipment in the Example Company.',
@@ -87,6 +64,7 @@ function plugin_protocolsmanager_install() {
 							1,
 							'Portrait',
 							1,
+							2,
 							'Test Division',
 							1)";
 							
@@ -97,70 +75,6 @@ function plugin_protocolsmanager_install() {
 	* UPDATES CONFIG TABLE FOR SCALABILITY
 	*/
 
-	//update config table if upgrading from 1.0
-	if (!$DB->FieldExists('glpi_plugin_protocolsmanager_config', 'orientation')) {
-		
-		$query = "ALTER TABLE glpi_plugin_protocolsmanager_config
-					ADD serial_mode int(2)
-						AFTER city,
-					ADD column1 varchar(255)
-						AFTER serial_mode,
-					ADD column2 varchar(255)
-						AFTER column1,
-					ADD orientation varchar(10)
-						AFTER column2";
-		
-		$DB->queryOrDie($query, $DB->error());
-		
-	}
-	
-	//update config table if upgrading from 1.1.2
-	if (!$DB->FieldExists('glpi_plugin_protocolsmanager_config', 'fontsize')) {
-		
-		$query = "ALTER TABLE glpi_plugin_protocolsmanager_config
-					ADD fontsize varchar(255)
-						AFTER font,
-					ADD breakword int(2)
-						AFTER fontsize";
-		
-		$DB->queryOrDie($query, $DB->error());
-		
-		$query = "UPDATE glpi_plugin_protocolsmanager_config
-					SET serial_mode=1, orientation='p', fontsize='9', breakword=1";
-		
-		$DB->queryOrDie($query, $DB->error());
-		
-	}
-
-	
-	//update config table if upgrading from 1.2		
-	if (!$DB->FieldExists('glpi_plugin_protocolsmanager_config', 'email_mode')) {
-		
-		$query = "ALTER TABLE glpi_plugin_protocolsmanager_config
-					ADD email_mode int(2)
-						AFTER breakword,
-					ADD email_template int(2)
-						AFTER email_mode";
-		
-		$DB->queryOrDie($query, $DB->error());
-		
-		$query = "UPDATE glpi_plugin_protocolsmanager_config
-					SET email_mode=2";
-		
-		$DB->queryOrDie($query, $DB->error());
-		
-	}
-	
-	//update config table if upgrading from 1.3
-	if (!$DB->FieldExists('glpi_plugin_protocolsmanager_config', 'upper_content')) {
-		
-		$query = "ALTER TABLE glpi_plugin_protocolsmanager_config
-					ADD upper_content text
-						AFTER email_mode";
-		
-		$DB->queryOrDie($query, $DB->error());
-	}
-
 	//update config table if upgrading before 1.5.0
 	if (!$DB->FieldExists('glpi_plugin_protocolsmanager_config', 'author_name')) {
 		
@@ -168,7 +82,17 @@ function plugin_protocolsmanager_install() {
 					ADD author_name varchar(255)
 						AFTER email_template
 					ADD author_state int(2)
-						AFTER author";
+						AFTER author_name";
+		
+		$DB->queryOrDie($query, $DB->error());
+	}
+
+	//update config table if upgrading before 1.5.2
+	if (!$DB->FieldExists('glpi_plugin_protocolsmanager_config', 'title')) {
+		
+		$query = "ALTER TABLE glpi_plugin_protocolsmanager_config
+					ADD title varchar(255)
+						AFTER name";
 		
 		$DB->queryOrDie($query, $DB->error());
 	}
@@ -188,14 +112,6 @@ function plugin_protocolsmanager_install() {
 					
 		$DB->queryOrDie($query, $DB->error());
 
-	}
-	
-	//update email_content field
-	if ($DB->FieldExists('glpi_plugin_protocolsmanager_emailconfig', 'email_content')) {
-
-		$query = "ALTER TABLE glpi_plugin_protocolsmanager_emailconfig MODIFY COLUMN email_content TEXT";
-	
-		$DB->queryOrDie($query, $DB->error());
 	}
 	
 	if (!$DB->tableExists('glpi_plugin_protocolsmanager_protocols')) {

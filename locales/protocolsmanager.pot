@@ -25,3 +25,15 @@ msgstr ""
 #: inc/config.class.php:234
 msgid "The user who generates the document"
 msgstr ""
+
+#: inc/config.class.php:148
+msgid "Document title"
+msgstr ""
+
+#: inc/config.class.php:149
+msgid "You can use {owner} here."
+msgstr ""
+
+#: inc/config.class.php:182
+msgid "You can use {owner} or {admin} here."
+msgstr ""

@@ -1,9 +1,8 @@
 # Protocols Manager
-GLPI Plugin to make PDF reports with user inventory.
-**Only supports for glpi v10+ and PHP version 8.0+**
+GLPI Plugin to make PDF reports with user inventory.  
+**Only supports for glpi v10+ and PHP version 8.0+** 
 **Removed parts of code using additionnal fields plugin**
 ## Upcoming Features
-* Possibility to customize title of document with the name of the user
 * Menu to access easily to protocols Manager
 ## Features
 * Making PDFs with all or selected user inventory
@@ -15,17 +14,27 @@ GLPI Plugin to make PDF reports with user inventory.
 * Showing serial number or inventory number in one or two columns
 * Possibility to add custom rows
 * Possibility to add notes to export
-## What's new in 1.5?
+## In 1.5.2
+* Possibility to customize title of document with the name of the user
+* Quality of life improvements
+* Fixed bugs
+* Added more verifications
+## What's new in 1.5.1?
 * Now you can select in the template settings who generates the PDF (for instance IT division or Name of the technician)
 * Fixed some bugs
+## What's new in 1.5?
+* Added compatibility for GLPI v10
+* Added more checks on the plugin
+* Updated the plugin
+
+## In 1.4.2:
+* Fixed one column mode in serial number
+* Document is now assigned to default user's entity
 ## What's new in 1.4?
 * New optional feature - sending emails with PDFs - automatically after generating PDF or manually in any moment
 * New text field in template above the table
 * Now you can use fields: Owner name - {owner}, current date - {cur_date} and admin name - {admin} in template text fields and email content and subject.
 * Fixed some bugs
-## In 1.4.2:
-* Fixed one column mode in serial number
-* Document is now assigned to default user's entity
 
 ## Compatibility
 GLPI 10.0 or higher
