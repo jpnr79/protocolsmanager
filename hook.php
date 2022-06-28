@@ -80,13 +80,19 @@ function plugin_protocolsmanager_install() {
 		
 		$query = "ALTER TABLE glpi_plugin_protocolsmanager_config
 					ADD author_name varchar(255)
-						AFTER email_template
+						AFTER email_template";
+		
+		$DB->queryOrDie($query, $DB->error());
+	}
+	
+	if (!$DB->FieldExists('glpi_plugin_protocolsmanager_config', 'author_state')) {
+		
+		$query = "ALTER TABLE glpi_plugin_protocolsmanager_config
 					ADD author_state int(2)
 						AFTER author_name";
 		
 		$DB->queryOrDie($query, $DB->error());
 	}
-
 	//update config table if upgrading before 1.5.2
 	if (!$DB->FieldExists('glpi_plugin_protocolsmanager_config', 'title')) {
 		
