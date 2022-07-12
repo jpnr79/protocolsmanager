@@ -168,12 +168,14 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 											if ($row2 = $req2->current()) {
 												$mod_name = $row2["name"];
 											}
+											
+											else {
+												echo '&nbsp;';
+												$mod_name = '';
+											}	
 											echo $mod_name;
 										}
-										else {
-											echo '&nbsp;';
-											$mod_name = '';
-										}	
+
 									}
 								echo "</td>";
 								echo "<td class='center'>$link</td>";
