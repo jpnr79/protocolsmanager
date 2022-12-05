@@ -830,6 +830,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 		});
 	});
 
+	// To do : store in db
 	// a CHANGER jqueryui
 	$(function() {
 
@@ -844,6 +845,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			cols += '<td><input type="button" class="ibtnDel" value="&#10006" style="background-color:red; font-size:9px;"></td>';
 			cols += '<td class="center"><input type="text" style="width:80% " name="type_name[]"></td>';
 			cols += '<td class="center"><input type="text" style="width:90% "name="man_name[]"></td>';
+			cols += '<td class="center"><input type="text" style="width:90% "name="mod_name[]"></td>';
 			cols += '<td class="center"><input type="text" style="width:90% "name="item_name[]"></td>';
 			cols += '<td class="center"><input type="text" style="width:90% "name="serial[]"></td>';
 			cols += '<td class="center"><input type="text" style="width:90% "name="otherserial[]"></td>';
