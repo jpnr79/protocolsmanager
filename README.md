@@ -3,7 +3,7 @@ GLPI Plugin to make PDF reports with user inventory.
 **Only supports for glpi v10.0 and PHP version 8.0.15**   
 **Removed parts of code using additionnal fields plugin**
 ## Upcoming Features
-* Menu to access easily to protocols Manager
+* ?
 ## Features
 * Making PDFs with all or selected user inventory
 * Saving protocols in GLPI Documents
@@ -14,6 +14,10 @@ GLPI Plugin to make PDF reports with user inventory.
 * Showing serial number or inventory number in one or two columns
 * Possibility to add custom rows
 * Possibility to add notes to export
+* Menu to access easily to protocols Manager
+## In 1.5.3
+* Menu to access Protocols manager instead of going from the plugins page
+* Updated some parts of codes
 ## In 1.5.2
 * Possibility to customize title of document with the name of the user
 * Quality of life improvements

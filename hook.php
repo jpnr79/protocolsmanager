@@ -1,7 +1,7 @@
 <?php
 
 function plugin_protocolsmanager_install() { 
-	global $DB, $CFG_GLPI;
+	global $DB;
 	$version = plugin_version_protocolsmanager();
 	$migration = new Migration($version['version']);	
 	
@@ -118,6 +118,19 @@ function plugin_protocolsmanager_install() {
 					
 		$DB->queryOrDie($query, $DB->error());
 
+	}
+
+	if($DB->tableExists('glpi_plugin_protocolsmanager_emailconfig'))
+	{
+		$query3 = "INSERT INTO glpi_plugin_protocolsmanager_emailconfig (
+			tname, send_user, email_content, email_subject, recipients)
+			VALUES ('Email default',
+					2,
+					'Testmail',
+					'Testmail',
+					'Testmail')";
+					
+		$DB->queryOrDie($query3, $DB->error());
 	}
 	
 	if (!$DB->tableExists('glpi_plugin_protocolsmanager_protocols')) {

@@ -4,8 +4,7 @@
 	
 	Session::haveRight("config", UPDATE);
 	
-	Html::header(PluginProtocolsmanagerConfig::getTypeName(1),
-               $_SERVER['PHP_SELF'], "plugins", "protocolsmanager", "config");
+	Html::header(PluginProtocolsmanagerConfig::getTypeName(2), '', "config", "PluginProtocolsmanagerMenu");
 			   
 	$PluginProtocolsmanagerConfig = new PluginProtocolsmanagerConfig();
 	
