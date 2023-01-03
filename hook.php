@@ -67,8 +67,25 @@ function plugin_protocolsmanager_install() {
 							2,
 							'Test Division',
 							1)";
+
+		$query4 = "INSERT INTO glpi_plugin_protocolsmanager_config (
+					name, title, font, fontsize, content, footer, city, serial_mode, orientation, breakword, email_mode, author_name, author_state)
+					VALUES ('Equipment report 2',
+							'Certificate of delivery of {owner}',
+							'Roboto',
+							'9',
+							'User: \n I have read the terms of use of IT equipment in the Example Company.',
+							'Example Company \n Example Street 21 \n 01-234 Example City',
+							'Example city',
+							1,
+							'Portrait',
+							1,
+							2,
+							'Test Division',
+							1)";
 							
 		$DB->queryOrDie($query2, $DB->error());
+		$DB->queryOrDie($query4, $DB->error());
 	}
 	
 	/**
