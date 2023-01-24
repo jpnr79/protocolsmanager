@@ -112,7 +112,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 
 						foreach ($item_iterator as $data) {
 								$cansee = $item->can($data["id"], READ);
-								$link  = $data["name"];
+								(empty($data["name"])) ? ($link = $data["id"]) : ($link  = $data["name"]);
 								if ($cansee) {
 									$link_item = $item::getFormURLWithID($data['id']);
 									if ($_SESSION["glpiis_ids_visible"] || empty($link)) {
