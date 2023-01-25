@@ -6,14 +6,14 @@ function plugin_version_protocolsmanager()
 
         return [
                 'name' => "Protocols manager",
-                'version'        => '1.5.3.2',
+                'version'        => '1.5.3.3',
                 'author'         => 'Mikail',
                 'license'        => 'GPLv3+',
                 'homepage'       => 'https://github.com/CanMik/protocolsmanager',
                 'requirements' => [
                         'glpi' => [
                                 'min' => '10.0.0',
-                                'max' => '10.0.6'
+                                'max' => '11.0.0'
                         ],
                         'php' => [
                                 'min' => '7.4'
@@ -31,12 +31,12 @@ function plugin_protocolsmanager_check_config()
 // Optional : check prerequisites before install : may print errors or add to message after redirect
 function plugin_protocolsmanager_check_prerequisites()
 {
-        if (version_compare(GLPI_VERSION, '10.0.0', 'lt') || version_compare(GLPI_VERSION, '10.0.5', 'gt')) {
+        if (version_compare(GLPI_VERSION, '10.0.0', 'lt') || version_compare(GLPI_VERSION, '11.0.0', 'gt')) {
                 if (method_exists('Plugin', 'messageIncompatible')) {
                         //since GLPI 9.2
-                        Plugin::messageIncompatible('core', '10.0.0', '10.0.5');
+                        Plugin::messageIncompatible('core', '10.0.0', '11.0.0');
                 } else {
-                        echo "This plugin requires GLPI >= 10.0.0 and < 10.0.5";
+                        echo "This plugin requires GLPI >= 10.0.0 and < 11.0.0";
                 }
                 return false;
         }
