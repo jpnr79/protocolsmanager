@@ -311,7 +311,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				$header2 .= "<th>".__('Date')."</th>";
 				$header2 .= "<th>".__('File')."</th>";
 				$header2 .= "<th>".__('Creator')."</th>";
-				$header2 .= "<th>".__('Comment')."</th>";
+				$header2 .= "<th>".__('Note')."</th>";
 				$header2 .= "<th>".__('Send email')."</th></tr>";
 				echo $header2;
 
