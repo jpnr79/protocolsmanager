@@ -674,9 +674,9 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			
 			global $CFG_GLPI, $DB;
 
-            if (is_null($id) && isset($_POST['user_id'])) {
-                $id = $_POST['user_id'];
-            }
+			if (is_null($id) && isset($_POST['user_id'])) {
+				$id = $_POST['user_id'];
+			}
 			
 			$nmail = new GLPIMailer();
 			
