@@ -286,7 +286,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				}
 				
 				$conca .= '<input type="hidden" name="user_id" value="'.$id.'">';
-                $conca .=  Html::closeForm(false);
+				$conca .=  Html::closeForm(false);
 
 				$conca .= '</div>';
 				$conca .= '</div>';
