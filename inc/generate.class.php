@@ -285,8 +285,8 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 					$conca .= '<input type="hidden" name="owner" value="'.$owner.'">';
 				}
 				
-				$conca .= '</form>';
-				// Html::closeForm();
+				$conca .= '<input type="hidden" name="user_id" value="'.$id.'">';
+				$conca .=  Html::closeForm(false);
 
 				$conca .= '</div>';
 				$conca .= '</div>';
@@ -670,9 +670,13 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			
 		}
 		
-		static function sendOneMail($id) {
+		static function sendOneMail($id=null) {
 			
 			global $CFG_GLPI, $DB;
+
+			if (is_null($id) && isset($_POST['user_id'])) {
+				$id = $_POST['user_id'];
+			}
 			
 			$nmail = new GLPIMailer();
 			
