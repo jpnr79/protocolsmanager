@@ -10,14 +10,14 @@ function plugin_protocolsmanager_install() {
 		$query = "CREATE TABLE glpi_plugin_protocolsmanager_profiles (
 					id int(11) NOT NULL auto_increment,
 					profile_id int(11),
-					plugin_conf char(1) collate utf8_unicode_ci default NULL,
-					tab_access char(1) collate utf8_unicode_ci default NULL,
-					make_access char(1) collate utf8_unicode_ci default NULL,
-					delete_access char(1) collate utf8_unicode_ci default NULL,
+					plugin_conf char(1) collate utf8mb4_unicode_ci default NULL,
+					tab_access char(1) collate utf8mb4_unicode_ci default NULL,
+					make_access char(1) collate utf8mb4_unicode_ci default NULL,
+					delete_access char(1) collate utf8mb4_unicode_ci default NULL,
 					PRIMARY KEY  (`id`)
-				  ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+				  ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
-		$DB->query($query) or die($DB->error());
+		$DB->doQuery($query) or die($DB->error());
 
 		$id = $_SESSION['glpiactiveprofile']['id'];
 		$query = "INSERT INTO glpi_plugin_protocolsmanager_profiles (profile_id, plugin_conf, tab_access, make_access, delete_access) VALUES ('$id','w', 'w', 'w', 'w')";
@@ -48,9 +48,9 @@ function plugin_protocolsmanager_install() {
 				  author_name varchar(255),
 				  author_state int(2),
 				  PRIMARY KEY (id)
-			   ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+			   ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 			   
-		$DB->queryOrDie($query, $DB->error());
+		$DB->doQueryOrDie($query, $DB->error());
 	  
 		$query2 = "INSERT INTO glpi_plugin_protocolsmanager_config (
 					name, title, font, fontsize, content, footer, city, serial_mode, orientation, breakword, email_mode, author_name, author_state)
@@ -84,8 +84,8 @@ function plugin_protocolsmanager_install() {
 							'Test Division',
 							1)";
 							
-		$DB->queryOrDie($query2, $DB->error());
-		$DB->queryOrDie($query4, $DB->error());
+		$DB->doQueryOrDie($query2, $DB->error());
+		$DB->doQueryOrDie($query4, $DB->error());
 	}
 	
 	/**
@@ -99,7 +99,7 @@ function plugin_protocolsmanager_install() {
 					ADD author_name varchar(255)
 						AFTER email_template";
 		
-		$DB->queryOrDie($query, $DB->error());
+		$DB->doQueryOrDie($query, $DB->error());
 	}
 	
 	if (!$DB->FieldExists('glpi_plugin_protocolsmanager_config', 'author_state')) {
@@ -108,7 +108,7 @@ function plugin_protocolsmanager_install() {
 					ADD author_state int(2)
 						AFTER author_name";
 		
-		$DB->queryOrDie($query, $DB->error());
+		$DB->doQueryOrDie($query, $DB->error());
 	}
 	//update config table if upgrading before 1.5.2
 	if (!$DB->FieldExists('glpi_plugin_protocolsmanager_config', 'title')) {
@@ -117,7 +117,7 @@ function plugin_protocolsmanager_install() {
 					ADD title varchar(255)
 						AFTER name";
 		
-		$DB->queryOrDie($query, $DB->error());
+		$DB->doQueryOrDie($query, $DB->error());
 	}
 	
 	if (!$DB->tableExists('glpi_plugin_protocolsmanager_emailconfig')) {
@@ -131,9 +131,9 @@ function plugin_protocolsmanager_install() {
 					email_footer varchar(255),
 					recipients varchar(255),
 					PRIMARY KEY (id)
-					) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+					) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 					
-		$DB->queryOrDie($query, $DB->error());
+		$DB->doQueryOrDie($query, $DB->error());
 
 	}
 
@@ -147,7 +147,7 @@ function plugin_protocolsmanager_install() {
 					'Testmail',
 					'Testmail')";
 					
-		$DB->queryOrDie($query3, $DB->error());
+		$DB->doQueryOrDie($query3, $DB->error());
 	}
 	
 	if (!$DB->tableExists('glpi_plugin_protocolsmanager_protocols')) {
@@ -161,9 +161,9 @@ function plugin_protocolsmanager_install() {
 				  document_id int(11),
 				  document_type varchar(255),
 				  PRIMARY KEY (id)
-               ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+               ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 			   
-		$DB->queryOrDie($query, $DB->error());
+		$DB->doQueryOrDie($query, $DB->error());
 	}
 	
 	if ($DB->tableExists('glpi_plugin_protocolsmanager_config')) {
