@@ -47,13 +47,23 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 		//show plugin content
 		function showContent($item) {
 			global $DB, $CFG_GLPI;
-			
+
+
+			# all other types except for User reports
+			if(get_class($item)!="User") {
+				$itemid = $item->id;
+				$tstid = $item->fields["users_id"];
+				$item = new User();
+				$item->getFromDB($tstid);
+			} 
+
 			$id = $item->getField('id');
 			$type_user   = $CFG_GLPI['linkuser_types'];
 			$field_user  = 'users_id';
 			$rand = mt_rand();
 			$counter = 0;
 
+			echo "<br>";
 			echo "<form method='post' name='user_field".$rand."' id='user_field".$rand."' action=\"" . $CFG_GLPI["root_doc"] . "/plugins/protocolsmanager/front/generate.form.php\">";
 			echo "<table class='tab_cadre_fixe'><tr><td style ='width:25%'></td>";
 			echo "<td class='center' style ='width:25%'>";
@@ -66,7 +76,8 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 					echo $list["name"];
 					echo '</option>';
 				}
-			echo "</select></td>";
+			echo "</select>";
+			echo "</td>";
 			echo "<td style='width:10%'><input type='submit' name='generate' class='submit' value='".__('Create')."'></td>";
 			echo "<td style='width:30%'></td></tr>";
 			echo "<tr><td></td><td colspan='2'><input type='text' name='notes' placeholder='".__('Note')."' style='width:89%; font-size:14px; padding: 2px'></td><td></td></tr>";
@@ -121,6 +132,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 									$link = "<a href='".$link_item."'>".$link."</a>";
 								}
 								$linktype = "";
+					
 								if ($data[$field_user] == $id) {
 									$linktype = self::getTypeName(1);
 								}
@@ -210,6 +222,14 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 									$item_name = '';
 								}
 								
+								if (isset($data["id"]) && !empty($data["id"])){
+									$ids = $data["id"];
+								} else{
+									echo "&nbsp;";
+									$ids='';
+								}
+								$classes=$itemtype;
+
 								$Owner = new User();
 								$Owner->getFromDB($id);
 								$Author = new User();
@@ -219,7 +239,9 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 								// il y avait aussi getRawName() mais je suis pas sur que ça soit vu le changelog
 								$owner = $Owner->getFriendlyName();
 								$author = $Author->getFriendlyName();
-																
+
+								echo "<input type='hidden' name='classes[]' value='$classes'>";
+								echo "<input type='hidden' name='ids[]' value='$ids'>";	
 								echo "<input type='hidden' name='owner' value ='$owner'>";
 								echo "<input type='hidden' name='author' value ='$author'>";
 								echo "<input type='hidden' name='type_name[]' value='$type_name'>";
@@ -285,8 +307,8 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 					$conca .= '<input type="hidden" name="owner" value="'.$owner.'">';
 				}
 				
-				$conca .= '<input type="hidden" name="user_id" value="'.$id.'">';
-				$conca .=  Html::closeForm(false);
+				$conca .= '</form>';
+				// Html::closeForm();
 
 				$conca .= '</div>';
 				$conca .= '</div>';
@@ -311,7 +333,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				$header2 .= "<th>".__('Date')."</th>";
 				$header2 .= "<th>".__('File')."</th>";
 				$header2 .= "<th>".__('Creator')."</th>";
-				$header2 .= "<th>".__('Note')."</th>";
+				$header2 .= "<th>".__('Comment')."</th>";
 				$header2 .= "<th>".__('Send email')."</th></tr>";
 				echo $header2;
 
@@ -328,14 +350,21 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 		//show user's generated documents
 		static function getAllForUser($id) {
 			global $DB, $CFG_GLPI;
+
+			// todo: recreate obj id as user_id
+			//		
+		
+			//$recipient->getFromDB(8);
+   
 			
+			
+
 			$exports = [];
 			$doc_counter = 0;
 			
 			foreach ($DB->request(
 				'glpi_plugin_protocolsmanager_protocols',
 				['user_id' => $id ]) as $export_data => $exports) {
-					
 					
 					echo "<tr class='tab_bg_1'>";
 					
@@ -384,8 +413,8 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 		//make PDF and save to DB
 		static function makeProtocol() 
 		{
-			global $DB, $CFG_GLPI;
-
+				global $DB, $CFG_GLPI;
+	
 				$number = $_POST['number'];
 				$type_name = $_POST['type_name'];
 				$man_name = $_POST['man_name'];
@@ -539,7 +568,49 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 					'document_type' => $title_template
 					]
 				);
-			
+
+				$DB->update(
+					'glpi_documents',
+				 	[
+						'users_id' => $id,
+						'name'=>$doc_name,
+						'comment'=>$title_template,
+					],
+					[
+						'id' => $doc_id
+					]
+				);
+
+
+				$DB->insert('glpi_documents_items', [
+					'documents_id' => $doc_id,
+					'items_id' => $id,
+					'itemtype' => 'User',
+					'users_id' => $id,
+					'date_creation' => $gen_date,
+					'date_mod' => $gen_date,
+					'date' => $gen_date,
+					]
+				);
+
+				// linking new document to all checked items
+
+				foreach ($_POST["number"] as &$itms) {
+					$class = $_POST["classes"][$itms];
+					$it    = $_POST["ids"][$itms];
+
+					$DB->insert('glpi_documents_items',[
+						'documents_id' => $doc_id,
+						'items_id' => $it,
+						'itemtype' => $class,
+						'users_id' => $id,
+						'date_creation' => $gen_date,
+						'date_mod' => $gen_date,
+						'date' => $gen_date,
+						]
+					);
+
+				}
 		}
 		
 		static function getDocNumber() {
@@ -583,6 +654,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			$input["documentcategories_id"] = 0;
 			$input["mime"] = "application/pdf";
 			$input["date_mod"] = date("Y-m-d H:i:s");
+			# 2p - owners id
 			$input["users_id"] = Session::getLoginUserID();
 			$input["comment"] = $notes;
 			$doc->check(-1, CREATE, $input);
@@ -670,13 +742,9 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			
 		}
 		
-		static function sendOneMail($id=null) {
+		static function sendOneMail($id) {
 			
 			global $CFG_GLPI, $DB;
-
-			if (is_null($id) && isset($_POST['user_id'])) {
-				$id = $_POST['user_id'];
-			}
 			
 			$nmail = new GLPIMailer();
 			
@@ -845,7 +913,6 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			$("#addNewRow").on("click", function () {
 				var newRow = $("<tr class='tab_bg_1'>");
 			var cols = "";
-			
 			cols += '<td><input type="button" class="ibtnDel" value="&#10006" style="background-color:red; font-size:9px;"></td>';
 			cols += '<td class="center"><input type="text" style="width:80% " name="type_name[]"></td>';
 			cols += '<td class="center"><input type="text" style="width:90% "name="man_name[]"></td>';

@@ -6,7 +6,7 @@ function plugin_version_protocolsmanager()
 
         return [
                 'name' => "Protocols manager",
-                'version'        => '1.5.4.0',
+                'version'        => '1.5.5.0',
                 'author'         => 'Mikail',
                 'license'        => 'GPLv3+',
                 'homepage'       => 'https://github.com/CanMik/protocolsmanager',
@@ -54,8 +54,14 @@ function plugin_init_protocolsmanager()
 
         Plugin::registerClass('PluginProtocolsmanagerGenerate', array('addtabon' => array('User')));
 
-        Plugin::registerClass('PluginProtocolsmanagerProfile', array('addtabon' => array('Profile')));
+        Plugin::registerClass('PluginProtocolsmanagerGenerate', array('addtabon' => array('Printer')));
+        Plugin::registerClass('PluginProtocolsmanagerGenerate', array('addtabon' => array('Peripheral')));
+        Plugin::registerClass('PluginProtocolsmanagerGenerate', array('addtabon' => array('Computer')));
+        Plugin::registerClass('PluginProtocolsmanagerGenerate', array('addtabon' => array('Phone')));
+        Plugin::registerClass('PluginProtocolsmanagerGenerate', array('addtabon' => array('Line')));
+        Plugin::registerClass('PluginProtocolsmanagerGenerate', array('addtabon' => array('Monitor')));
 
+        Plugin::registerClass('PluginProtocolsmanagerProfile', array('addtabon' => array('Profile')));
         Plugin::registerClass('PluginProtocolsmanagerConfig', array('addtabon' => array('Config')));
 
         $PLUGIN_HOOKS['add_css']['protocolsmanager'] = 'css/styles.css';
