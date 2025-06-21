@@ -223,7 +223,7 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 				echo '<option value=';
 				echo $list["id"];
 				if ($uid == $email_template) {
-					echo '" selected';
+					echo ' selected';
 				}
 				echo '>';
 				echo $list["tname"];
