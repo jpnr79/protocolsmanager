@@ -5,7 +5,7 @@ function plugin_version_protocolsmanager(): array
 {
     return [
         'name'         => __('Protocols manager', 'protocolsmanager'),
-        'version'      => '1.5.5.3',
+        'version'      => '1.5.5.4',
         'author'       => 'Mikail',
         'license'      => 'GPLv3+',
         'homepage'     => 'https://github.com/CanMik/protocolsmanager',
@@ -61,9 +61,10 @@ function plugin_init_protocolsmanager(): void
     Plugin::registerClass('PluginProtocolsmanagerProfile', ['addtabon' => ['Profile']]);
     Plugin::registerClass('PluginProtocolsmanagerConfig',  ['addtabon' => ['Config']]);
 
-    // Config page & menu
-    if (Session::haveRight('config', READ)) {
+    // Config page & menu need to relog to have access to menu
+    if (PluginProtocolsmanagerProfile::currentUserHasRight('plugin_conf')) {
         $PLUGIN_HOOKS['menu_toadd']['protocolsmanager'] = ['config' => 'PluginProtocolsmanagerMenu'];
         $PLUGIN_HOOKS['config_page']['protocolsmanager'] = 'front/config.form.php';
     }
+
 }
