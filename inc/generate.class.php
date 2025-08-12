@@ -50,12 +50,21 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 
 
 			# all other types except for User reports
-			if(get_class($item)!="User") {
-				$itemid = $item->id;
-				$tstid = $item->fields["users_id"];
-				$item = new User();
-				$item->getFromDB($tstid);
-			} 
+			if (get_class($item) !== "User") {
+
+				// Vérifie que l'objet a bien un ID et un users_id
+				if (!empty($item->id) && !empty($item->fields["users_id"])) {
+					$itemid = $item->id;
+					$tstid  = $item->fields["users_id"];
+			
+					$item = new User();
+					$item->getFromDB($tstid);
+				} else {
+					// Pas d'utilisateur lié
+					$itemid = null;
+					$tstid  = null;
+				}
+			}
 
 			$id = $item->getField('id');
 			$type_user   = $CFG_GLPI['linkuser_types'];
