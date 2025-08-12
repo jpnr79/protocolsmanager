@@ -2,31 +2,22 @@
 
 class PluginProtocolsmanagerMenu extends CommonGLPI
 {
+    public static function getMenuName(): string
+    {
+        return __('Protocols Manager', 'protocolsmanager');
+    }
 
-  static $rightname = 'plugin_protocolsmanager';
+    public static function getIcon(): string
+    {
+        return 'fas fa-briefcase';
+    }
 
-  static function getMenuName()
-  {
-    return __("Protocols Manager", "protocolsmanager");
-  }
-
-  static function getIcon()
-  {
-    return "fas fa-briefcase";
-    // https://fontawesome.com/v4/icon/briefcase
-    // https://fontawesome.com/v4/icon/id-card-o
-    // https://fontawesome.com/v4/icon/archive
-  }
-
-  static function getMenuContent()
-  {
-
-    global $CFG_GLPI;
-    $menu                      = [];
-    $menu['title']             = self::getMenuName();
-    $menu['page']              = "/" . Plugin::getWebDir('protocolsmanager', false) . "/front/config.form.php";
-    $menu['icon']              = self::getIcon();
-
-    return $menu;
-  }
+    public static function getMenuContent(): array
+    {
+        return [
+            'title' => self::getMenuName(),
+            'page'  => '/' . Plugin::getWebDir('protocolsmanager', false) . '/front/config.form.php',
+            'icon'  => self::getIcon(),
+        ];
+    }
 }

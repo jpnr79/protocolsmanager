@@ -1,417 +1,166 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<meta http-equiv="Content-Type" content="charset=utf-8" />
-		<style type="text/css">
-			body
-			{
-				font-size: <?php echo $fontsize; ?>;
-			}
-			footer 
-			{ 
-				position: fixed; bottom: -10px; left: 0px; right: 0px; height: 50px; text-align: center; font-size: 8pt; color: gray;
-			}
-			#items
-			{
-				border: solid 0.5px black; width:100%; position: relative; table-layout: auto;
-			}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <style>
+        body {
+            font-size: <?= htmlspecialchars($fontsize) ?>;
+        }
+        footer {
+            position: fixed;
+            bottom: -10px;
+            left: 0; right: 0;
+            height: 50px;
+            text-align: center;
+            font-size: 8pt;
+            color: gray;
+        }
+        #items {
+            border: 0.5px solid black;
+            width: 100%;
+            table-layout: auto;
+            border-collapse: collapse;
+        }
+        #items th, #items td {
+            border: 0.5px solid black;
+            padding: 2px;
+        }
+        <?php if ($breakword == 1): ?>
+        #items td {
+            word-wrap: break-word;
+        }
+        <?php endif; ?>
+    </style>
+</head>
+<body>
 
-			#items th
-			{
-				border: solid 0.5px black; padding: 2px;
-			}
+<?php if ($islogo == 1 && file_exists($logo)): 
+    $img_type = pathinfo($logo, PATHINFO_EXTENSION);
+    $img_data = file_get_contents($logo);
+    $base64 = 'data:image/' . $img_type . ';base64,' . base64_encode($img_data);
+?>
+    <div style="text-align: center;">
+        <img src="<?= $base64 ?>" alt="Logo" style="width: 100%; display: block;" />
+    </div>
+<?php endif; ?>
 
-			#items td
-			{
-				border: solid 0.5px black; padding: 2px;
-				<?php 
-				if ($breakword == 1) {
-					echo 'word-wrap: break-word;';
-				}
-				?>
-			}
+<table style="width: 100%; border: none;">
+    <tr>
+        <td style="height: 8mm; width: 70%;"><?= htmlspecialchars($prot_num) . '-' . date('dmY') ?></td>
+        <td style="height: 8mm; width: 30%; text-align: right;"><?= htmlspecialchars($city) . ' ' . date('d.m.Y') ?></td>
+    </tr>
+</table>
 
-		</style>
-	</head>
-	<body>
-	<?php 
-		if ($islogo == 1) {
+<table style="width: 100%; border: none;">
+    <tr>
+        <td style="text-align: center; font-size: 15pt; height: 15mm;"><?= htmlspecialchars($title) ?></td>
+    </tr>
+</table>
 
+<br>
 
-			$img_type = pathinfo($logo, PATHINFO_EXTENSION);
-			$img_data = file_get_contents($logo);
-			$base64 = 'data:image/'.$img_type.';base64,'.base64_encode($img_data);
-			echo "<center><img src='".$base64."' style='display: block; width: 100%;'></center>";
+<table>
+    <tr>
+        <td><?= $upper_content ?></td>
+    </tr>
+</table>
 
+<br>
 
-			// echo '<img src="';
-			// echo $logo;
-			// echo '" style="display: block; width: 100%; height: 20mm;">';
+<table id="items" cellspacing="0" cellpadding="0">
+    <tr>
+        <th></th>
+        <th><?= __('Type') ?></th>
+        <th><?= __('Manufacturer') ?></th>
+        <th><?= __('Model') ?></th>
+        <th><?= __('Name') ?></th>
+        <?php if ($serial_mode == 1): ?>
+            <th><?= __('Serial number') ?></th>
+            <th><?= __('Inventory number') ?></th>
+        <?php else: ?>
+            <th><?= __('Serial number') ?></th>
+        <?php endif; ?>
+        <?php if (!empty(array_filter($comments))): ?>
+            <th><?= __('Comments') ?></th>
+        <?php endif; ?>
+    </tr>
 
-		}
-	?>
-		<table style="border: none; width: 100%;">
-			<td style="height: 8mm; width: 70%;"><?php echo $prot_num; echo "-"; echo date('dmY'); ?></td>
-			<td style="height: 8mm; width: 30%; text-align: right;"><?php echo $city." "; $date=date('d.m.Y'); echo $date; ?></td>
-		</table>
-		
-		<table style="border:none; width: 100%;">
-			<tr>
-				<td style="border:none; text-align: center; width: 100%; font-size: 15pt;  height: 15mm;">
-				<?php echo $title; ?>
-				</td>
-			</tr>
-		</table>
-	<br>
-	<table>
-		<tr>
-			<td style="weight:100%;">
-	<?php echo $upper_content; ?>
-			</td>
-		</tr>
-	</table>
-	<br>
-	<table id="items" cellspacing="0">
+<?php 
+$lp = 1;
 
-	<?php
-		// Concatenation for sending the result
-		$conca = '';
-		$lp = 1;
+if (!empty($number)) {
+    foreach ($number as $key) {
+        echo '<tr><td>' . $lp++ . '</td>';
 
-		//if no comments, there is no comments column
-		if (empty(array_filter($comments))) {
-			
-			//if serial and inventory in different columns
-			if ($serial_mode == 1) {
-				echo '<tr>
-				<th></th>
-				<th>'; 
-				echo __('Type');
-				echo "</th><th>";
-				echo __('Manufacturer');
-				echo "</th><th>";
-				echo __('Model');
-				echo "</th><th>";
-				echo __('Name');				
-				echo "</th><th>"; 
-				echo __('Serial number'); 
-				echo "</th><th>";
-				echo __('Inventory number'); 
-				echo "</th></tr>";
-				
-				
-				if (isset($number))
-				{
-					foreach ($number as $key) {
+        // Type
+        echo '<td>' . ($type_name[$key] ?? '') . '</td>';
 
-						$conca = '<tr><td>'. $lp . '</td>';
-		
-						if (isset($type_name[$key])) {
-							$conca .= '<td>' . $type_name[$key] .'</td>';
-						}
+        // Manufacturer and Model
+        if (!empty($man_name[$key])) {
+            echo '<td>' . $man_name[$key] . '</td>';
+            echo '<td>' . ($mod_name[$key] ?? '') . '</td>';
+        } else {
+            echo '<td></td>';
+            echo '<td>' . ($mod_name[$key] ?? '') . '</td>';
+        }
 
-						// if there is manufacturer
-						if(isset($man_name[$key]) && !empty($man_name[$key]))
-						{
+        // Name
+        echo '<td>' . ($item_name[$key] ?? '') . '</td>';
 
-							if(isset($mod_name[$key]))
-							{
-								$conca .= '<td>'. $man_name[$key] .'</td><td>'. $mod_name[$key]. '</td>';
+        // Serial / Inventory
+        if ($serial_mode == 1) {
+            echo '<td>' . ($serial[$key] ?? '') . '</td>';
+            echo '<td>' . ($otherserial[$key] ?? '') . '</td>';
+        } else {
+            // serial_mode == 2
+            $serial_value = $serial[$key] ?? '';
+            if (empty($serial_value)) {
+                $serial_value = $otherserial[$key] ?? '';
+            }
+            echo '<td>' . $serial_value . '</td>';
+        }
 
-							}
-							else {
-								$conca .= '<td>'. $man_name[$key] .'</td><td></td>';
-							}
-							
-						}
-						else {
-							$conca .= '<td></td><td>'. $mod_name[$key] .'</td>';
-						}
-		
-						if (isset($item_name[$key])) {
-							$conca .= '<td>' .$item_name[$key] .'</td>';
-						}
-		
-						if (isset($serial[$key])) {
-							$conca .= '<td>'. $serial[$key] .'</td>';
-						}
-		
-						if (isset($otherserial[$key])) {
-							$conca .= '<td>'. $otherserial[$key] .'</td>';
-						}
-		
-						echo $conca .= '</tr>';
-		
-						$lp++;
-					}
-				}
+        // Comments if any
+        if (!empty(array_filter($comments))) {
+            echo '<td>' . ($comments[$key] ?? '') . '</td>';
+        }
 
-			}
+        echo '</tr>';
+    }
+}
+?>
+</table>
 
-			//if serial and inventory in one column
-			if ($serial_mode == 2) {
-				
-				echo "<tr>
-					<th></th>
-					<th>"; 
-					echo __('Type');
-					echo "</th><th>";
-					echo __('Manufacturer');
-					echo "</th><th>";
-					echo __('Model'); 
-					echo "</th><th>"; 
-					echo __('Name'); 
-					echo "</th><th>";
-					echo __('Serial number');
-					echo "</th>
-				</tr>";
+<br>
 
-				if (isset($number))
-				{
-					foreach ($number as $key) {
+<table>
+    <tr><td style="height: 10mm;"></td></tr>
+</table>
 
-						if (empty($serial[$key])) {
-							$serial[$key]=$otherserial[$key];
-						} //if no serial, get inventory number
+<table>
+    <tr><td><?= $content ?></td></tr>
+</table>
 
-						$conca = '<tr><td>'. $lp . '</td>';
-		
-						if (isset($type_name[$key])) {
-							$conca .= '<td>' . $type_name[$key] .'</td>';
-						}
+<table>
+    <tr><td style="height: 20mm;"></td></tr>
+</table>
 
-						// if there is manufacturer
-						if(isset($man_name[$key]) && !empty($man_name[$key]))
-						{
+<table style="width: 100%; border-collapse: collapse;">
+    <tr>
+        <td style="width:50%; border-bottom: 1px solid black;"><strong><?= __('Administrator') ?>:</strong></td>
+        <td style="width:50%; border-bottom: 1px solid black;"><strong><?= __('User') ?>:</strong></td>
+    </tr>
+    <tr>
+        <td style="width:50%; border: 1px solid black; vertical-align: top; height: 20mm;">
+            <?= ($author_state == 2) ? $author_name : $author ?>
+        </td>
+        <td style="width:50%; border: 1px solid black; vertical-align: top; height: 20mm;">
+            <?= $owner ?>
+        </td>
+    </tr>
+</table>
 
-							if(isset($mod_name[$key]))
-							{
-								$conca .= '<td>'. $man_name[$key] .'</td><td>'. $mod_name[$key]. '</td>';
+<footer><?= $footer ?></footer>
 
-							}
-							else {
-								$conca .= '<td>'. $man_name[$key] .'</td><td></td>';
-							}
-							
-						}
-						else {
-							$conca .= '<td></td><td>'. $mod_name[$key] .'</td>';
-						}
-		
-						if (isset($item_name[$key])) {
-							$conca .= '<td>' .$item_name[$key] .'</td>';
-						}
-		
-						if (isset($serial[$key])) {
-							$conca .= '<td>'. $serial[$key] .'</td>';
-						}
-		
-						echo $conca .= '</tr>';
-		
-						$lp++;
-					}
-				}
-
-			}
-
-		}
-		else {
-			//if at least one comment, there will be comment column
-			if ($serial_mode == 1) {
-				
-				echo "<tr>
-					<th></th>
-					<th>"; 
-					echo __('Type');
-					echo "</th><th>";
-					echo __('Manufacturer');
-					echo "</th><th>"; 
-					echo __('Model'); 
-					echo "</th><th>"; 
-					echo __('Name'); 
-					echo "</th><th>"; 
-					echo __('Serial number'); 
-					echo "</th><th>";
-					echo __('Inventory number'); 
-					echo "</th><th>";
-					echo __('Comments'); 
-					echo "</th>
-				</tr>";
-				
-				if (isset($number))
-				{
-					foreach ($number as $key) {
-
-						$conca = '<tr><td>'. $lp . '</td>';
-		
-						if (isset($type_name[$key])) {
-							$conca .= '<td>' . $type_name[$key] .'</td>';
-						}
-		
-						// if there is manufacturer
-						if(isset($man_name[$key]) && !empty($man_name[$key]))
-						{
-
-							if(isset($mod_name[$key]))
-							{
-								$conca .= '<td>'. $man_name[$key] .'</td><td>'. $mod_name[$key]. '</td>';
-
-							}
-							else {
-								$conca .= '<td>'. $man_name[$key] .'</td><td></td>';
-							}
-							
-						}
-						else {
-							$conca .= '<td></td><td>'. $mod_name[$key] .'</td>';
-						}
-		
-						if (isset($item_name[$key])) {
-							$conca .= '<td>' .$item_name[$key] .'</td>';
-						}
-		
-						if (isset($serial[$key])) {
-							$conca .= '<td>'. $serial[$key] .'</td>';
-						}
-		
-						if (isset($otherserial[$key])) {
-							$conca .= '<td>'. $otherserial[$key] .'</td>';
-						}
-
-						if (isset($comments[$key])) {
-							$conca .= '<td>'. $comments[$key] .'</td>';
-						}
-		
-						echo $conca .= '</tr>';
-		
-						$lp++;
-					}
-				}
-			}
-
-			if ($serial_mode == 2) {
-				
-				echo "<tr>
-					<th></th>
-					<th>"; 
-					echo __('Type');
-					echo "</th><th>"; 
-					echo __('Manufacturer');
-					echo "</th><th>"; 
-					echo __('Model'); 
-					echo "</th><th>"; 
-					echo __('Name'); 
-					echo "</th><th>";
-					echo __('Serial number'); 
-					echo "</th><th>";
-					echo __('Comments'); 
-					echo "</th>
-				</tr>";
-				
-				
-				if (isset($number))
-				{
-					foreach ($number as $key) {
-
-						if (empty($serial[$key])) {
-							$serial[$key]=$otherserial[$key];
-						} //if no serial, get inventory number
-
-						$conca = '<tr><td>'. $lp . '</td>';
-		
-						if (isset($type_name[$key])) {
-							$conca .= '<td>' . $type_name[$key] .'</td>';
-						}
-		
-						// if there is manufacturer
-						if(isset($man_name[$key]) && !empty($man_name[$key]))
-						{
-
-							if(isset($mod_name[$key]))
-							{
-								$conca .= '<td>'. $man_name[$key] .'</td><td>'. $mod_name[$key]. '</td>';
-
-							}
-							else {
-								$conca .= '<td>'. $man_name[$key] .'</td><td></td>';
-							}
-							
-						}
-						else {
-							$conca .= '<td></td><td>'. $mod_name[$key] .'</td>';
-						}
-		
-						if (isset($item_name[$key])) {
-							$conca .= '<td>' .$item_name[$key] .'</td>';
-						}
-		
-						if (isset($serial[$key])) {
-							$conca .= '<td>'. $serial[$key] .'</td>';
-						}
-
-						if (isset($comments[$key])) {
-							$conca .= '<td>'. $comments[$key] .'</td>';
-						}
-		
-						echo $conca .= '</tr>';
-		
-						$lp++;
-					}
-				}
-			}
-
-		}
-			
-
-	?>
-	</table>
-
-	<br>
-
-	<table>
-		<tr>
-			<td style="height: 10mm;"></td>
-		</tr>
-	</table>
-
-	<table>
-		<tr>
-			<td style="weight:100%;">
-	<?php echo $content; ?>
-			</td>
-		</tr>
-	</table>
-
-	<table>
-		<tr>
-			<td style="height: 20mm;"></td>
-		</tr>
-	</table>
-
-	<table style="border-collapse: collapse; width: 100%;">
-		<tr>
-			<td style="width:50%; border-bottom: 1px solid black;"><strong><?php echo __('Administrator').":"; ?></strong></td>
-			<td style="width:50%; border-bottom: 1px solid black;"><strong><?php echo __('User').":"; ?></strong></td>
-		</tr>
-		<tr>
-			<td style="border: 1px solid black; width:50%; vertical-align:top; height: 20mm">
-			<?php 
-			if($author_state == 2) {
-				echo $author_name;
-			}
-			else {
-				echo $author;
-			}
-			?>
-			</td>
-			<td style="border: 1px solid black; width:50%; vertical-align:top; height: 20mm">
-				<?php echo $owner; ?>
-			</td>
-		</tr>
-	</table>
-
-		<footer>
-			<?php echo $footer; ?>
-		</footer>
-	</body>
+</body>
 </html>
