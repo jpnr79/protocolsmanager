@@ -279,7 +279,6 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				
 				
 				//send email popup
-
 				$conca  = '<div class="modal fade" id="motus" role="dialog">';
 				$conca .= '<div class="modal-dialog">';
 				$conca .= '<div class="modal-content">';
@@ -288,6 +287,9 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				$conca .= '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>';
 				$conca .= '</div><div class="modal-body" title="'.__("Send").' email"><p>Select recipients from template or enter manually to send email</p><br><br>';
 				$conca .= '<form method="post" action="'.$CFG_GLPI["root_doc"].'/plugins/protocolsmanager/front/generate.form.php">';
+
+				$conca .= Html::hidden('_glpi_csrf_token', ['value' => Session::getNewCSRFToken()]);
+
 				$conca .= '<input type="hidden" id="dialogVal" name="doc_id" value="">';
 				$conca .= '<input type="radio" name="send_type" id="manually" class="send_type" value="1"><b> Enter recipients manually </b><br><br>';
 				$conca .= '<textarea style="width:90%; height:30px" name="em_list" class="man_recs" placeholder="Recipients (use ; to separate emails)"></textarea><br><br>';
@@ -296,7 +298,6 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				$conca .= '<input type="radio" name="send_type" id="auto" class="send_type" value="2"><b> Select recipients from template</b><br><br>';
 
 				$conca .= '<select name="e_list" id="auto_recs" disabled="disabled" style="font-size:14px; width:95%">';
-
 				foreach ($DB->request('glpi_plugin_protocolsmanager_emailconfig') as $uid => $list) {
 					$conca .= '<option value="';
 					$conca .= $list["recipients"]."|".$list["email_subject"]."|".$list["email_content"]."|".$list["send_user"];
@@ -306,18 +307,16 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				}
 				$conca .= '</select><br><br><input type="submit" name="send" class="submit" value='.__("Send").'>';
 
-				if(!empty($author))
-				{
+				if(!empty($author)) {
 					$conca .= '<input type="hidden" name="author" value="'.$author.'">';
 				}
 
-				if(!empty($owner))
-				{
+				if(!empty($owner)) {
 					$conca .= '<input type="hidden" name="owner" value="'.$owner.'">';
 				}
-				
-				$conca .= '</form>';
-				// Html::closeForm();
+
+				$conca .= '<input type="hidden" name="user_id" value="'.$id.'">';
+				$conca .=  Html::closeForm(false);
 
 				$conca .= '</div>';
 				$conca .= '</div>';
@@ -326,12 +325,16 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				$conca .= '</div>';
 				echo $conca;
 				// fin du popup
-				
+
+
 				//add custom row
 				echo "<div class='spaced'><button class='addNewRow' id='addNewRow' style='background-color:#8ec547; color:#fff; cursor:pointer; font:bold 12px Arial, Helvetica; border:0; padding:5px;'>Add Custom Fields</button></div>";
-				
+
 				echo "<div class='spaced'>";
 				echo "<form method='post' name='docs_form' action='".$CFG_GLPI["root_doc"]."/plugins/protocolsmanager/front/generate.form.php'>";
+
+				echo Html::hidden('_glpi_csrf_token', ['value' => Session::getNewCSRFToken()]);
+
 				echo "<table class='tab_cadre_fixe'><td style='width:5%'><img src='".$CFG_GLPI["root_doc"]."/plugins/protocolsmanager/img/arrow-left-top.png'></td><td style='width:5%'>";
 				echo "<input type='submit' name='delete' class='submit' value=".__('Delete').">";
 				echo "</td><td style='width:90%'></table>";
@@ -350,8 +353,9 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				echo "</table>";
 				Html::closeForm();
 				echo "</div>";
-				
+
 				return true;
+
 			
 		}
 		
@@ -754,9 +758,13 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			
 		}
 		
-		static function sendOneMail($id) {
+		static function sendOneMail($id=null) {
 			
 			global $CFG_GLPI, $DB;
+
+			if (is_null($id) && isset($_POST['user_id'])) {
+				$id = $_POST['user_id'];
+			}
 			
 			$nmail = new GLPIMailer();
 			
