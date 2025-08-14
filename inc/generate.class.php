@@ -359,69 +359,60 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			
 		}
 		
-		// TODO
-		//show user's generated documents
 		static function getAllForUser($id) {
 			global $DB, $CFG_GLPI;
-
-			// todo: recreate obj id as user_id
-			//		
 		
-			//$recipient->getFromDB(8);
-   
-			
-			
-
 			$exports = [];
 			$doc_counter = 0;
-			
-			foreach ($DB->request(
-				'glpi_plugin_protocolsmanager_protocols',
-				['user_id' => $id ]) as $export_data => $exports) {
-					
-					echo "<tr class='tab_bg_1'>";
-					
-					echo "<td class='center'>";
-					echo "<input type='checkbox' name='docnumber[]' value='".$exports['document_id']."' class='docchild' style='height:16px; width: 16px;'>";
-					echo "</td>";
-					
-					echo "<td class='center'>";
-					$Doc = new Document();
-					$Doc->getFromDB($exports['document_id']);
-					echo $Doc->getLink();
-					echo "</td>";
-					
-					echo "<td class='center'>";
-					echo $exports['document_type'];
-					echo "</td>";
-					
-					echo "<td class='center'>";
-					echo $exports['gen_date'];
-					echo "</td>";
-					
-					echo "<td class='center'>";
-					echo $Doc->getDownloadLink();
-					echo "</td>";
-					
-					echo "<td class='center'>";
-					echo $exports['author'];
-					echo "</td>";
-					
-					echo "<td class='center'>";
-					echo $Doc->getField("comment");
-					echo "</td>";
-					
-					echo "<td class='center'>";
-					echo "<span class='docid' style='display:none'>".$exports['document_id']."</span>";
-					echo "<a class='openDialog' style='background-color:#8ec547; color:#fff; cursor:pointer; font:bold 12px Arial, Helvetica; border:0; padding:5px;' href='#'>".__('Send')."</a>";
-					echo "</td>";
-					
-					
-					echo "</tr>";
-
-					$doc_counter++;
-				}
+		
+			foreach ($DB->request('glpi_plugin_protocolsmanager_protocols', ['user_id' => $id]) as $export_data => $exports) {
+		
+				echo "<tr class='tab_bg_1'>";
+		
+				echo "<td class='center'>";
+				echo "<input type='checkbox' name='docnumber[]' value='".$exports['document_id']."' class='docchild' style='height:16px; width:16px;'>";
+				echo "</td>";
+		
+				echo "<td class='center'>";
+				$Doc = new Document();
+				$Doc->getFromDB($exports['document_id']);
+				echo $Doc->getLink();
+				echo "</td>";
+		
+				echo "<td class='center'>";
+				echo $exports['document_type'];
+				echo "</td>";
+		
+				echo "<td class='center'>";
+				echo $exports['gen_date'];
+				echo "</td>";
+		
+				echo "<td class='center'>";
+				echo $Doc->getDownloadLink();
+				echo "</td>";
+		
+				echo "<td class='center'>";
+				echo $exports['author'];
+				echo "</td>";
+		
+				echo "<td class='center'>";
+				echo $Doc->getField("comment");
+				echo "</td>";
+		
+				echo "<td class='center'>";
+				echo "<button type='button'
+						class='btn btn-sm btn-success send-email-btn'
+						data-docid='".$exports['document_id']."'
+						data-bs-toggle='modal'
+						data-bs-target='#motus'>".__('Send')."</button>";
+				echo "</td>";
+		
+				echo "</tr>";
+		
+				$doc_counter++;
+			}
 		}
+		
 		
 		//make PDF and save to DB
 		static function makeProtocol() 
@@ -759,9 +750,9 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 		}
 		
 		static function sendOneMail($id=null) {
-			
+    
 			global $CFG_GLPI, $DB;
-
+		
 			if (is_null($id) && isset($_POST['user_id'])) {
 				$id = $_POST['user_id'];
 			}
@@ -772,7 +763,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			
 			$doc_id = $_POST["doc_id"];
 			
-			//if email is filled manually
+			// if email is filled manually
 			if (isset($_POST["em_list"])) {
 				$recipients = $_POST["em_list"];
 			}
@@ -789,16 +780,16 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				$email_content = ' ';
 			}
 			
-			//if email is from template
+			// if email is from template
 			if (isset($_POST['e_list'])) {
 				$result = explode('|', $_POST['e_list']);
-				$recipients = $result[0];
+				$recipients   = $result[0];
 				$email_subject = $result[1];
-				$email_content =  $result[2];
-				$send_user =  $result[3];
+				$email_content = $result[2];
+				$send_user     = $result[3];
 			}
 			
-			$owner = $_POST["owner"];
+			$owner  = $_POST["owner"];
 			$author = $_POST["author"];
 			
 			$email_content = str_replace("{owner}", $owner, $email_content);
@@ -809,56 +800,61 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 			$email_subject = str_replace("{admin}", $author, $email_subject);
 			$email_subject = str_replace("{cur_date}", date("d.m.Y"), $email_subject);
 			
-			$recipients_array = explode(';',$recipients);
+			$recipients_array = explode(';', $recipients);
 			
 			$req2 = $DB->request(
-					'glpi_useremails',
-					['users_id' => $id, 'is_default' => 1]);
-					
+				'glpi_useremails',
+				['users_id' => $id, 'is_default' => 1]
+			);
+							
 			if ($row2 = $req2->current()) {
 				$owner_email = $row2["email"];
 			}
 			
-			if ($send_user == 1) {
+			if (!empty($send_user) && $send_user == 1) {
 				$nmail->AddAddress($owner_email);
 			}
 			
 			foreach($recipients_array as $recipient) {
-				
-				$nmail->AddAddress($recipient); //do konfiguracji
+				if (!empty($recipient)) {
+					$nmail->AddAddress($recipient);
+				}
 			}
 			
-			$req = $DB->request(
+			// Récupération et vérification du document
+			if (!empty($doc_id)) {
+				$req = $DB->request(
 					'glpi_documents',
-					['id' => $doc_id ]);
-			
-			if ($row = $req->current()) {
-				$path = $row["filepath"];
-				$filename = $row["filename"];
+					['id' => $doc_id ]
+				);
+				
+				if ($row = $req->current()) {
+					$fullpath = GLPI_VAR_DIR . '/' . $row["filepath"];
+					$filename = $row["filename"];
+								
+					if (file_exists($fullpath)) {
+						$nmail->addAttachment($fullpath, $filename);
+					} else {
+						Session::addMessageAfterRedirect(__('Attachment file not found: ') . $fullpath, false, ERROR);
+					}
+				}
 			}
-			
-			$fullpath = GLPI_VAR_DIR . '/' . $path;
 			
 			$nmail->IsHtml(true);
-			
-			$nmail->Subject = $email_subject; //do konfiguracji
-			$nmail->addAttachment($fullpath, $filename);
-			$nmail->Body = nl2br(stripcslashes($email_content));
+			$nmail->Subject = $email_subject;
+			$nmail->Body    = nl2br(stripcslashes($email_content));
 			
 			if (!$nmail->Send()) {
 				Session::addMessageAfterRedirect(__('Failed to send email'), false, ERROR);
 				return false;
 			} else {
-				
-				if ($send_user == 1) {
+				if (!empty($send_user) && $send_user == 1) {
 					Session::addMessageAfterRedirect(__('Email sent')." to ".implode(", ", $recipients_array)." ".$owner_email);
-					return true;
 				} else {
 					Session::addMessageAfterRedirect(__('Email sent')." to ".implode(", ", $recipients_array));
-					return true;
 				}
+				return true;
 			}
-			
 		}
 		
 	
@@ -955,5 +951,14 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 
 
 	});
+
+	document.addEventListener('click', function(e){
+			var btn = e.target.closest('.send-email-btn');
+			if (!btn) return;
+		
+			var docId = btn.getAttribute('data-docid') || '';
+			var input = document.getElementById('dialogVal');
+			if (input) input.value = docId;
+	});	
 
 </script>
