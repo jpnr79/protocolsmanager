@@ -13,6 +13,9 @@ GLPI Plugin to make PDF reports with user inventory.
 * Possibility to add custom rows
 * Possibility to add notes to export
 * Menu to access easily to protocols Manager
+## In 1.5.6
+* Set dimensions of logo in the template settings
+* Updated some parts of codes
 ## In 1.5.3
 * Menu to access Protocols manager instead of going from the plugins page
 * Updated some parts of codes
