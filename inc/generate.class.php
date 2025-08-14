@@ -522,7 +522,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 					$backtop = "20mm";
 					$islogo = 0;
 				} else {
-					$logo = GLPI_ROOT.'/files/_pictures/'.$full_img_name;
+					$logo = GLPI_PICTURE_DIR . '/' . $full_img_name;
 					$backtop = "40mm";
 					$islogo = 1;
 				}
@@ -713,7 +713,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				$filename = $row["filename"];
 			}
 			
-			$fullpath = GLPI_ROOT."/files/".$path;
+			$fullpath = GLPI_VAR_DIR . '/' . $path;
 			
 			$req2 = $DB->request(
 					'glpi_useremails',
@@ -829,7 +829,7 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 				$filename = $row["filename"];
 			}
 			
-			$fullpath = GLPI_ROOT."/files/".$path;
+			$fullpath = GLPI_VAR_DIR . '/' . $path;
 			
 			$nmail->IsHtml(true);
 			

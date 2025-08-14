@@ -205,7 +205,7 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 		echo "> serial or inventory number if serial doesn't exists</label></td></tr>";
 		echo "<tr><td>".__('Logo')."</td><td colspan='2'><input type='file' name='logo' accept='image/png, image/jpeg'>";
 		if (isset($logo) && $logo != '') {
-			$full_img_name = GLPI_ROOT.'/files/_pictures/'.$logo;
+			$full_img_name = GLPI_PICTURE_DIR . '/' . $logo;
 			if (file_exists($full_img_name)) {
 				$img_type = pathinfo($full_img_name, PATHINFO_EXTENSION);
 				$img_data = file_get_contents($full_img_name);
@@ -702,7 +702,7 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 						$img_name = "logo".time();
 						$ext = pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION);
 						$full_img_name = $img_name.'.'.$ext;
-						$img_path = GLPI_ROOT.'/files/_pictures/'.$full_img_name;
+						$img_path = GLPI_PICTURE_DIR . '/' . $full_img_name;
 						
 						move_uploaded_file($_FILES['logo']['tmp_name'], $img_path);
 						
