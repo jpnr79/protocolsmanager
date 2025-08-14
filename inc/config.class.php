@@ -78,6 +78,10 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 				$email_template = $row["email_template"];
 				$author_name = $row["author_name"];
 				$author_state = $row["author_state"];
+	
+				// Récupérer width/height du logo si présents
+				$logo_width = isset($row["logo_width"]) ? $row["logo_width"] : '';
+				$logo_height = isset($row["logo_height"]) ? $row["logo_height"] : '';
 			}
 			
 		} else {
@@ -97,8 +101,9 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 			$email_template = 1;
 			$author_name = '';
 			$author_state = 1;
+			$logo_width = '';
+			$logo_height = '';
 		}
-		
 		
 		$fonts = array('Courier' => 'Courier',
 						'Helvetica' => 'Helvetica', 
@@ -142,7 +147,6 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 		echo "<input type='hidden' name='MAX_FILE_SIZE' value=1948000>";
 		echo "<input type='hidden' name='mode' value='$mode'>";
 		echo "<table class='tab_cadre_fixe'>";
-		//echo "<tr><th></th>";
 		echo "<tr><th colspan='3'>".__('Create')." ".__('template')."<a href='https://github.com/mateusznitka/protocolsmanager/wiki/Using-the-plugin' target='_blank'><img src='../img/help.png' width='20px' height='20px' align='right'></a></th></tr>";
 		echo "<tr><td>".__('Template name')."*</td><td colspan='2'><input type='text' name='template_name' style='width:80%;' value='".htmlspecialchars($template_name,ENT_QUOTES)."'></td></tr>";
 		echo "<tr><td>".__('Document title', 'protocolsmanager')."*</td><td colspan='2'><input type='text' name='title' style='width:80%;' value='".htmlspecialchars($title,ENT_QUOTES)."'></td></tr>";
@@ -200,16 +204,46 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 			echo "checked='checked'";
 		echo "> serial or inventory number if serial doesn't exists</label></td></tr>";
 		echo "<tr><td>".__('Logo')."</td><td colspan='2'><input type='file' name='logo' accept='image/png, image/jpeg'>";
-		if (isset($logo)) {
+		if (isset($logo) && $logo != '') {
 			$full_img_name = GLPI_ROOT.'/files/_pictures/'.$logo;
-			$img_type = pathinfo($full_img_name, PATHINFO_EXTENSION);
-			$img_data = file_get_contents($full_img_name);
-			$base64 = 'data:image/'.$img_type.';base64,'.base64_encode($img_data);
-			$img_delete = true;
-			echo "&nbsp&nbsp<img src = ".$base64." style='height:50px; width:auto;'>";
-			echo "&nbsp&nbsp<input type='checkbox' name='img_delete' value='$img_delete'>&nbsp ".__('Delete')." ".__('File');
+			if (file_exists($full_img_name)) {
+				$img_type = pathinfo($full_img_name, PATHINFO_EXTENSION);
+				$img_data = file_get_contents($full_img_name);
+				$base64 = 'data:image/'.$img_type.';base64,'.base64_encode($img_data);
+				$img_delete = true;
+	
+				// Construire la balise img avec les dimensions si définies
+				$width_attr = $logo_width != '' ? "width='".intval($logo_width)."'": "style='height:50px; width:auto;'";
+				$height_attr = $logo_height != '' ? "height='".intval($logo_height)."'" : "";
+	
+				// Prioriser l'attribut width et height s'ils existent, sinon style par défaut
+				if ($logo_width != '' || $logo_height != '') {
+					// Si au moins un est défini, on utilise width et height
+					$img_tag = "<img src='".$base64."' ";
+					if ($logo_width != '') {
+						$img_tag .= "width='".intval($logo_width)."' ";
+					}
+					if ($logo_height != '') {
+						$img_tag .= "height='".intval($logo_height)."' ";
+					}
+					$img_tag .= "/>";
+				} else {
+					$img_tag = "<img src='".$base64."' style='height:50px; width:auto;'/>";
+				}
+	
+				echo "&nbsp;&nbsp;".$img_tag;
+				echo "&nbsp;&nbsp;<input type='checkbox' name='img_delete' value='$img_delete'>&nbsp ".__('Delete')." ".__('File');
+			}
 		}
 		echo "</td></tr>";
+	
+		// Nouveau champ largeur logo
+		echo "<tr><td>".__('Logo width (px)')."</td><td colspan='2'><input type='number' min='0' name='logo_width' value='".htmlspecialchars($logo_width, ENT_QUOTES)."' style='width:80px;'></td></tr>";
+	
+		// Nouveau champ hauteur logo
+		echo "<tr><td>".__('Logo height (px)')."</td><td colspan='2'><input type='number' min='0' name='logo_height' value='".htmlspecialchars($logo_height, ENT_QUOTES)."' style='width:80px;'></td></tr>";
+	
+		// ... suite du formulaire ...
 		echo "<tr><td>".__('Enable email autosending')."</td><td><label><input type='radio' name='email_mode' value='1'";
 		if ($email_mode == 1)
 			echo "checked='checked'";
@@ -250,6 +284,7 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 		/**
 		*
 		*/
+	
 		echo "</table>";
 		echo "<table class='tab_cadre_fixe'><td style='text-align:right;'><input type='submit' name='save' class='submit'></td>";
 		Html::closeForm();
@@ -258,9 +293,8 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 		echo "</div>";
 		echo "<br>";
 		self::showConfigs();
-		
-		
 	}
+	
 	
 	static function DisplayContentEmail() {
 		global $DB, $CFG_GLPI;
@@ -399,6 +433,15 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 
 			}
 
+
+			if (isset($_POST["logo_width"])) {
+				$logo_width = intval($_POST["logo_width"]);
+			}
+			if (isset($_POST["logo_height"])) {
+				$logo_height = intval($_POST["logo_height"]);
+			}
+
+
 			// TODO : concaténé quand les champs sont vides
 
 			
@@ -413,6 +456,8 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 					'content' => $template_content,
 					'footer' => $template_footer,
 					'logo' => $full_img_name,
+					'logo_width'    => $logo_width,
+					'logo_height'   => $logo_height,
 					'font' => $font,
 					'fontsize' => $fontsize,
 					'city' => $city,
@@ -429,6 +474,7 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 			
 			//if edit template
 			if ($mode != 0) {
+
 
 				// quand c'est séléctionner et qu'on refais sauvegardé
 				// la valeur est égale à "X\"" au lieu de "X"
@@ -447,6 +493,8 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 							'upper_content' => $template_uppercontent,
 							'footer' => $template_footer,
 							'logo' => $full_img_name,
+							'logo_width'    => $logo_width,
+							'logo_height'   => $logo_height,
 							'font' => $font,
 							'fontsize' => $fontsize,
 							'city' => $city,
@@ -486,6 +534,8 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 							'content' => $template_content,
 							'upper_content' => $template_uppercontent,
 							'footer' => $template_footer,
+							'logo_width'    => $logo_width,
+							'logo_height'   => $logo_height,
 							'font' => $font,
 							'fontsize' => $fontsize,
 							'city' => $city,
@@ -507,6 +557,8 @@ class PluginProtocolsmanagerConfig extends CommonDBTM {
 							'content' => $template_content,
 							'upper_content' => $template_uppercontent,
 							'footer' => $template_footer,
+							'logo_width'    => $logo_width,
+							'logo_height'   => $logo_height,
 							'font' => $font,
 							'fontsize' => $fontsize,
 							'city' => $city,

@@ -468,6 +468,9 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 					$email_template = $row["email_template"];
 					$author_name = $row["author_name"];
 					$author_state = $row["author_state"];
+
+					$logo_width = isset($row["logo_width"]) ? $row["logo_width"] : null;
+					$logo_height = isset($row["logo_height"]) ? $row["logo_height"] : null;
 				}
 
 				$req2 = $DB->request(

@@ -38,9 +38,16 @@
     $img_type = pathinfo($logo, PATHINFO_EXTENSION);
     $img_data = file_get_contents($logo);
     $base64 = 'data:image/' . $img_type . ';base64,' . base64_encode($img_data);
+
+    // Valeurs par défaut si non fournies
+    $max_width = !empty($logo_width) ? intval($logo_width) : 200;
+    $max_height = !empty($logo_height) ? intval($logo_height) : 200;
+
+    // Style avec maintien du ratio
+    $style = "max-width: {$max_width}px; max-height: {$max_height}px; height: auto; width: auto; object-fit: contain; display: block; margin: 0 auto;";
 ?>
     <div style="text-align: center;">
-        <img src="<?= $base64 ?>" alt="Logo" style="width: 100%; display: block;" />
+        <img src="<?= $base64 ?>" alt="Logo" style="<?= $style ?>" />
     </div>
 <?php endif; ?>
 
@@ -126,6 +133,7 @@ if (!empty($number)) {
         }
 
         echo '</tr>';
+
     }
 }
 ?>

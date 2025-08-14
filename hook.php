@@ -50,6 +50,8 @@ function plugin_protocolsmanager_install(): bool
             font VARCHAR(255),
             fontsize VARCHAR(255),
             logo VARCHAR(255),
+            logo_width INT(11) DEFAULT NULL,
+            logo_height INT(11) DEFAULT NULL,
             content TEXT,
             footer TEXT,
             city VARCHAR(255),
@@ -141,7 +143,9 @@ function plugin_protocolsmanager_install(): bool
     $fieldsToAdd = [
         'author_name' => "ALTER TABLE glpi_plugin_protocolsmanager_config ADD author_name VARCHAR(255) AFTER email_template",
         'author_state' => "ALTER TABLE glpi_plugin_protocolsmanager_config ADD author_state INT(2) AFTER author_name",
-        'title'        => "ALTER TABLE glpi_plugin_protocolsmanager_config ADD title VARCHAR(255) AFTER name"
+        'title'        => "ALTER TABLE glpi_plugin_protocolsmanager_config ADD title VARCHAR(255) AFTER name",
+        'logo_width'   => "ALTER TABLE glpi_plugin_protocolsmanager_config ADD logo_width INT(11) DEFAULT NULL AFTER logo",
+        'logo_height'  => "ALTER TABLE glpi_plugin_protocolsmanager_config ADD logo_height INT(11) DEFAULT NULL AFTER logo_width"
     ];
     foreach ($fieldsToAdd as $field => $sql) {
         if (!$DB->fieldExists('glpi_plugin_protocolsmanager_config', $field)) {
