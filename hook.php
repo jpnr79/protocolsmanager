@@ -183,3 +183,19 @@ function plugin_protocolsmanager_uninstall(): bool
 
     return true;
 }
+
+/**
+ * Safe loader to prevent early table access
+ */
+function plugin_protocolsmanager_getRights(?int $profile_id = null)
+{
+    global $DB;
+    if (!$DB->tableExists('glpi_plugin_protocolsmanager_profiles')) {
+        return []; // Avoid query before installation
+    }
+
+    return $DB->request([
+        'FROM'  => 'glpi_plugin_protocolsmanager_profiles',
+        'WHERE' => ['profile_id' => $profile_id ?? 0]
+    ])->current();
+}
