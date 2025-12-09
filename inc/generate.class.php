@@ -9,11 +9,9 @@ use Dompdf\Options;
 
 class PluginProtocolsmanagerGenerate extends CommonDBTM {
 	
-		function getTabNameForItem(CommonGLPI $item, $withtemplate=0) {
-			return self::createTabEntry('Protocols manager');
-		}
-
-		static function displayTabContentForItem(CommonGLPI $item, $tabnum=1, $withtemplate=0) {
+	function getTabNameForItem(CommonGLPI $item, $withtemplate=0) {
+		return self::createTabEntry(__('Protocols manager', 'protocolsmanager'), 0, null, 'fas fa-file-pdf');
+	}		static function displayTabContentForItem(CommonGLPI $item, $tabnum=1, $withtemplate=0) {
 			global $DB, $CFG_GLPI;
 			
 			$tab_access = self::checkRights();
