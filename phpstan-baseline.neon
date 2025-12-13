@@ -1,0 +1,139 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Parameter \$parser of method Composer\\InstalledVersions\:\:satisfies\(\) has invalid type Composer\\Semver\\VersionParser\.$#'
+			identifier: class.notFound
+			count: 1
+			path: dompdf/vendor/composer/InstalledVersions.php
+
+		-
+			message: '#^Call to vsprintf contains 3 placeholders, 4 values given\.$#'
+			identifier: argument.vsprintf
+			count: 2
+			path: dompdf/vendor/dompdf/dompdf/lib/Cpdf.php
+
+		-
+			message: '#^Undefined variable\: \$object$#'
+			identifier: variable.undefined
+			count: 2
+			path: dompdf/vendor/dompdf/dompdf/lib/Cpdf.php
+
+		-
+			message: '#^Cannot unset property Dompdf\\Adapter\\PDFLib\:\:\$_file because it might have hooks in a subclass\.$#'
+			identifier: unset.possiblyHookedProperty
+			count: 2
+			path: dompdf/vendor/dompdf/dompdf/src/Adapter/PDFLib.php
+
+		-
+			message: '#^Cannot unset property Dompdf\\FontMetrics\:\:\$fontFamilies because it might have hooks in a subclass\.$#'
+			identifier: unset.possiblyHookedProperty
+			count: 2
+			path: dompdf/vendor/dompdf/dompdf/src/FontMetrics.php
+
+		-
+			message: '#^Method Dompdf\\FontMetrics\:\:setFontFamilies\(\) should return array but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: dompdf/vendor/dompdf/dompdf/src/FontMetrics.php
+
+		-
+			message: '#^Cannot unset property Dompdf\\Frame\:\:\$_style because it might have hooks in a subclass\.$#'
+			identifier: unset.possiblyHookedProperty
+			count: 1
+			path: dompdf/vendor/dompdf/dompdf/src/Frame.php
+
+		-
+			message: '#^Cannot unset property Dompdf\\FrameDecorator\\AbstractFrameDecorator\:\:\$_frame because it might have hooks in a subclass\.$#'
+			identifier: unset.possiblyHookedProperty
+			count: 1
+			path: dompdf/vendor/dompdf/dompdf/src/FrameDecorator/AbstractFrameDecorator.php
+
+		-
+			message: '#^Cannot unset property Dompdf\\FrameDecorator\\AbstractFrameDecorator\:\:\$_positioner because it might have hooks in a subclass\.$#'
+			identifier: unset.possiblyHookedProperty
+			count: 1
+			path: dompdf/vendor/dompdf/dompdf/src/FrameDecorator/AbstractFrameDecorator.php
+
+		-
+			message: '#^Cannot unset property Dompdf\\FrameDecorator\\AbstractFrameDecorator\:\:\$_reflower because it might have hooks in a subclass\.$#'
+			identifier: unset.possiblyHookedProperty
+			count: 1
+			path: dompdf/vendor/dompdf/dompdf/src/FrameDecorator/AbstractFrameDecorator.php
+
+		-
+			message: '#^Cannot unset property Dompdf\\FrameDecorator\\AbstractFrameDecorator\:\:\$_root because it might have hooks in a subclass\.$#'
+			identifier: unset.possiblyHookedProperty
+			count: 1
+			path: dompdf/vendor/dompdf/dompdf/src/FrameDecorator/AbstractFrameDecorator.php
+
+		-
+			message: '#^Class FontLib\\glyf not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: dompdf/vendor/dompdf/php-font-lib/src/FontLib/AdobeFontMetrics.php
+
+		-
+			message: '#^Method FontLib\\Table\\DirectoryEntry\:\:open\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: dompdf/vendor/dompdf/php-font-lib/src/FontLib/Table/DirectoryEntry.php
+
+		-
+			message: '#^Method FontLib\\WOFF\\File\:\:load\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: dompdf/vendor/dompdf/php-font-lib/src/FontLib/WOFF/File.php
+
+		-
+			message: '#^Method Svg\\Style\:\:fromAttributes\(\) should return Svg\\Style but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: dompdf/vendor/dompdf/php-svg-lib/src/Svg/Style.php
+
+		-
+			message: '#^Call to vsprintf contains 3 placeholders, 4 values given\.$#'
+			identifier: argument.vsprintf
+			count: 2
+			path: dompdf/vendor/dompdf/php-svg-lib/src/Svg/Surface/CPdf.php
+
+		-
+			message: '#^Undefined variable\: \$object$#'
+			identifier: variable.undefined
+			count: 2
+			path: dompdf/vendor/dompdf/php-svg-lib/src/Svg/Surface/CPdf.php
+
+		-
+			message: '#^Call to an undefined method Svg\\Surface\\SurfaceCpdf\:\:_convert_gif_bmp_to_png\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: dompdf/vendor/dompdf/php-svg-lib/src/Svg/Surface/SurfaceCpdf.php
+
+		-
+			message: '#^Call to an undefined static method Session\:\:getActiveEntity\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: inc/generate.class.php
+
+		-
+			message: '#^Call to an undefined static method Session\:\:getNewCSRFToken\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 2
+			path: inc/generate.class.php
+
+		-
+			message: '#^Call to static method addErrorMessageAfterRedirect\(\) on an unknown class GLPINetwork\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/generate.class.php
+
+		-
+			message: '#^Instantiated class GLPIMailer not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: inc/generate.class.php
+
+		-
+			message: '#^Result of static method Html\:\:closeForm\(\) \(void\) is used\.$#'
+			identifier: staticMethod.void
+			count: 1
+			path: inc/generate.class.php
