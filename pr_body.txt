@@ -1,0 +1,22 @@
+compat: Make plugin compatible with GLPI 11 and fix DB/raw SQL issues
+
+Summary
+- Bump compatibility for GLPI 11 (setup.php).
+- Replace direct DB->query with safe DB API calls; avoid building/executing raw SQL in the DB iterator.
+- Use utf8mb4 collations and adjust ID fields to `INT UNSIGNED` where appropriate.
+- Harden `makeProtocol()` to validate POST input and avoid inserting NULL `items_id`.
+- Replace raw SELECT used by the item iterator with structured `DB->request()` criteria.
+- Add tests: `tests/run_makeprotocol.php` (CLI) and `tests/run_web_makeprotocol.php` (web integration).
+
+Testing performed
+- Installed and activated the plugin on GLPI 11 in this environment.
+- Ran `php -l` for syntax checks.
+- Executed `tests/run_makeprotocol.php` to produce a PDF and glpi DB entries.
+- Executed `tests/run_web_makeprotocol.php` (logs in, posts the form, verifies the document->item link).
+- Verified `files/_log/php-errors.log` no longer contains the `DBmysqlIterator::execute()` raw-query critical exception.
+
+Notes for reviewers
+- The branch `compat/glpi-11` contains all commits and tests.
+- Manual UI verification: open a User form and the Protocols Manager tab, create a protocol and confirm the PDF is attached and linked to selected items.
+- I can open the PR from your fork if you prefer; otherwise follow the instructions in `pr_instructions.txt` to push and create the PR.
+
