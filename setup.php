@@ -12,7 +12,7 @@ function plugin_version_protocolsmanager(): array
         'requirements' => [
             'glpi' => [
                 'min' => '10.0.0',
-                'max' => '11.0.0'
+                'max' => '12.0.0'
             ],
             'php'  => [
                 'min' => '7.4'
@@ -30,11 +30,11 @@ function plugin_protocolsmanager_check_config(): bool
 // Prerequisites check
 function plugin_protocolsmanager_check_prerequisites(): bool
 {
-    if (version_compare(GLPI_VERSION, '10.0.0', '<') || version_compare(GLPI_VERSION, '11.0.0', '>')) {
+    if (version_compare(GLPI_VERSION, '10.0.0', '<') || version_compare(GLPI_VERSION, '12.0.0', '>')) {
         if (method_exists('Plugin', 'messageIncompatible')) {
-            Plugin::messageIncompatible('core', '10.0.0', '11.0.0');
+            Plugin::messageIncompatible('core', '10.0.0', '12.0.0');
         } else {
-            echo __('This plugin requires GLPI >= 10.0.0 and < 11.0.0', 'protocolsmanager');
+            echo __('This plugin requires GLPI >= 10.0.0 and < 12.0.0', 'protocolsmanager');
         }
         return false;
     }
