@@ -3,7 +3,7 @@ chdir(__DIR__ . '/../../..');
 
 // Simple web integration test that logs in and posts a valid generate form
 $base = 'http://localhost';
-cookie = __DIR__ . '/.cookies_test';
+$cookie = __DIR__ . '/.cookies_test';
 @unlink($cookie);
 
 // helper
