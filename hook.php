@@ -32,8 +32,8 @@ function plugin_protocolsmanager_install(): bool
     $createTable(
         'glpi_plugin_protocolsmanager_profiles',
         "CREATE TABLE glpi_plugin_protocolsmanager_profiles (
-            id INT(11) NOT NULL AUTO_INCREMENT,
-            profile_id INT(11),
+            id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+            profile_id INT(11) UNSIGNED,
             plugin_conf CHAR(1) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
             tab_access CHAR(1) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
             make_access CHAR(1) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -53,7 +53,7 @@ function plugin_protocolsmanager_install(): bool
     $createTable(
         'glpi_plugin_protocolsmanager_config',
         "CREATE TABLE glpi_plugin_protocolsmanager_config (
-            id INT(11) NOT NULL AUTO_INCREMENT,
+            id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
             name VARCHAR(255),
             title VARCHAR(255),
             font VARCHAR(255),
@@ -116,7 +116,7 @@ function plugin_protocolsmanager_install(): bool
     $createTable(
         'glpi_plugin_protocolsmanager_emailconfig',
         "CREATE TABLE glpi_plugin_protocolsmanager_emailconfig (
-            id INT(11) NOT NULL AUTO_INCREMENT,
+            id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
             tname VARCHAR(255),
             send_user INT(2),
             email_content TEXT,
@@ -137,16 +137,17 @@ function plugin_protocolsmanager_install(): bool
     $createTable(
         'glpi_plugin_protocolsmanager_protocols',
         "CREATE TABLE glpi_plugin_protocolsmanager_protocols (
-            id INT(11) NOT NULL AUTO_INCREMENT,
+            id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
             name VARCHAR(255),
-            user_id INT(11),
+            user_id INT(11) UNSIGNED,
             gen_date DATETIME,
             author VARCHAR(255),
-            document_id INT(11),
+            document_id INT(11) UNSIGNED,
             document_type VARCHAR(255),
             PRIMARY KEY (id)
         ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
     );
+
 
     // Update config table fields if upgrading from older versions
     $fieldsToAdd = [
@@ -156,15 +157,19 @@ function plugin_protocolsmanager_install(): bool
         'logo_width'   => "ALTER TABLE glpi_plugin_protocolsmanager_config ADD logo_width INT(11) DEFAULT NULL AFTER logo",
         'logo_height'  => "ALTER TABLE glpi_plugin_protocolsmanager_config ADD logo_height INT(11) DEFAULT NULL AFTER logo_width"
     ];
-    foreach ($fieldsToAdd as $field => $sql) {
-        if (!$DB->fieldExists('glpi_plugin_protocolsmanager_config', $field)) {
-            try {
-                $DB->doQuery($sql);
-            } catch (\Exception $e) {
-                Toolbox::logInFile('php-errors', "Error adding field $field: " . $e->getMessage() . "\n");
+    // Ensure config table exists before attempting to add fields
+    if ($DB->tableExists('glpi_plugin_protocolsmanager_config')) {
+        foreach ($fieldsToAdd as $field => $sql) {
+            if (!$DB->fieldExists('glpi_plugin_protocolsmanager_config', $field)) {
+                try {
+                    $DB->doQuery($sql);
+                } catch (\Exception $e) {
+                    Toolbox::logInFile('php-errors', "Error adding field $field: " . $e->getMessage() . "\n");
+                }
             }
         }
     }
+
 
     $migration->executeMigration();
     return true;
