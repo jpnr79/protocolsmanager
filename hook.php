@@ -34,12 +34,12 @@ function plugin_protocolsmanager_install(): bool
         "CREATE TABLE glpi_plugin_protocolsmanager_profiles (
             id INT(11) NOT NULL AUTO_INCREMENT,
             profile_id INT(11),
-            plugin_conf CHAR(1) COLLATE utf8_unicode_ci DEFAULT NULL,
-            tab_access CHAR(1) COLLATE utf8_unicode_ci DEFAULT NULL,
-            make_access CHAR(1) COLLATE utf8_unicode_ci DEFAULT NULL,
-            delete_access CHAR(1) COLLATE utf8_unicode_ci DEFAULT NULL,
+            plugin_conf CHAR(1) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+            tab_access CHAR(1) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+            make_access CHAR(1) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+            delete_access CHAR(1) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
             PRIMARY KEY (id)
-        ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8_unicode_ci",
+        ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
         [
             sprintf(
                 "INSERT INTO glpi_plugin_protocolsmanager_profiles (profile_id, plugin_conf, tab_access, make_access, delete_access)
@@ -75,7 +75,7 @@ function plugin_protocolsmanager_install(): bool
             author_name VARCHAR(255),
             author_state INT(2),
             PRIMARY KEY (id)
-        ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8_unicode_ci",
+        ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
         [
             "INSERT INTO glpi_plugin_protocolsmanager_config
                 (name, title, font, fontsize, content, footer, city, serial_mode, orientation, breakword, email_mode, author_name, author_state)
@@ -124,7 +124,7 @@ function plugin_protocolsmanager_install(): bool
             email_footer VARCHAR(255),
             recipients VARCHAR(255),
             PRIMARY KEY (id)
-        ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8_unicode_ci",
+        ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
         [
             "INSERT INTO glpi_plugin_protocolsmanager_emailconfig
                 (tname, send_user, email_content, email_subject, recipients)
@@ -145,7 +145,7 @@ function plugin_protocolsmanager_install(): bool
             document_id INT(11),
             document_type VARCHAR(255),
             PRIMARY KEY (id)
-        ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8_unicode_ci"
+        ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
     );
 
     // Update config table fields if upgrading from older versions
