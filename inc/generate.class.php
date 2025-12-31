@@ -475,7 +475,11 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 					$recipients = $row2["recipients"];
 				}
 				
-				$comments = $_POST['comments'];
+// Ensure comments is an array for template checks
+					$comments = $_POST['comments'] ?? [];
+					if (!is_array($comments)) {
+						$comments = [];
+					}
 				
 				if (!isset($font) || empty($font)) {
 					$font = 'dejavusans';
@@ -596,23 +600,30 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 					]
 				);
 
-				// linking new document to all checked items
+					// linking new document to all checked items (only when valid items are provided)
 
-				foreach ($_POST["number"] as &$itms) {
-					$class = $_POST["classes"][$itms];
-					$it    = $_POST["ids"][$itms];
+					if (!empty($number) && is_array($number)) {
+						foreach ($number as $itms) {
+							$class = $_POST["classes"][ $itms ] ?? null;
+							$it    = $_POST["ids"][ $itms ] ?? null;
 
-					$DB->insert('glpi_documents_items',[
-						'documents_id' => $doc_id,
-						'items_id' => $it,
-						'itemtype' => $class,
-						'users_id' => $id,
-						'date_creation' => $gen_date,
-						'date_mod' => $gen_date,
-						'date' => $gen_date,
-						]
-					);
+							// Skip invalid entries (missing class or id, or non-numeric id)
+							if (empty($class) || empty($it) || !is_numeric($it)) {
+								continue;
+							}
 
+							$DB->insert('glpi_documents_items',[
+								'documents_id' => $doc_id,
+								'items_id' => (int)$it,
+								'itemtype' => $class,
+								'users_id' => $id,
+								'date_creation' => $gen_date,
+								'date_mod' => $gen_date,
+								'date' => $gen_date,
+								]
+							);
+
+						}
 				}
 		}
 		
