@@ -12,17 +12,21 @@ function plugin_protocolsmanager_install(): bool
     // Helper: create table if not exists
     $createTable = function (string $name, string $schema, array $inserts = []) use ($DB) {
         if (!$DB->tableExists($name)) {
-            if (!$DB->query($schema)) {
-                Toolbox::logInFile('php-errors', "Error creating table $name: " . $DB->error() . "\n");
+            try {
+                $DB->doQuery($schema);
+            } catch (\Exception $e) {
+                Toolbox::logInFile('php-errors', "Error creating table $name: " . $e->getMessage() . "\n");
                 return;
             }
             foreach ($inserts as $insert) {
-                if (!$DB->query($insert)) {
-                    Toolbox::logInFile('php-errors', "Error inserting defaults for $name: " . $DB->error() . "\n");
+                try {
+                    $DB->doQuery($insert);
+                } catch (\Exception $e) {
+                    Toolbox::logInFile('php-errors', "Error inserting defaults for $name: " . $e->getMessage() . "\n");
                 }
             }
         }
-    };
+    }; 
 
     // Profiles table
     $createTable(
@@ -154,8 +158,10 @@ function plugin_protocolsmanager_install(): bool
     ];
     foreach ($fieldsToAdd as $field => $sql) {
         if (!$DB->fieldExists('glpi_plugin_protocolsmanager_config', $field)) {
-            if (!$DB->query($sql)) {
-                Toolbox::logInFile('php-errors', "Error adding field $field: " . $DB->error() . "\n");
+            try {
+                $DB->doQuery($sql);
+            } catch (\Exception $e) {
+                Toolbox::logInFile('php-errors', "Error adding field $field: " . $e->getMessage() . "\n");
             }
         }
     }
@@ -178,7 +184,11 @@ function plugin_protocolsmanager_uninstall(): bool
     ];
 
     foreach ($tables as $table) {
-        $DB->query("DROP TABLE IF EXISTS `$table`");
+        try {
+            $DB->doQuery("DROP TABLE IF EXISTS `$table`");
+        } catch (\Exception $e) {
+            Toolbox::logInFile('php-errors', "Error dropping table $table: " . $e->getMessage() . "\n");
+        }
     }
 
     return true;
