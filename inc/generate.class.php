@@ -113,20 +113,16 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 						// il va récupérer toutes les tables du matos
 						$itemtable = getTableForItemType($itemtype);
 						
-						$iterator_params = "SELECT *
-						FROM $itemtable
-						WHERE $field_user = $id";
+					// Build criteria array for DB->request instead of raw SQL
+					$where = [$field_user => $id];
+					if ($item->maybeTemplate()) {
+						$where['is_template'] = 0;
+					}
+					if ($item->maybeDeleted()) {
+						$where['is_deleted'] = 0;
+					}
 
-						if ($item->maybeTemplate()) {
-							// j'ai du mettre un espace après le " et le and car sinon dans la requete les deux sont collés et ça casse la requête
-							$iterator_params .= " AND is_template = 0";
-						}
-						
-						if ($item->maybeDeleted()) {
-							$iterator_params .= " AND is_deleted = 0";
-						}
-
-						$item_iterator = $DB->request($iterator_params);
+					$item_iterator = $DB->request(['FROM' => $itemtable, 'WHERE' => $where]);
 						$type_name = $item->getTypeName();
 						$item_iterator->current();
 
@@ -623,7 +619,10 @@ class PluginProtocolsmanagerGenerate extends CommonDBTM {
 		static function getDocNumber() {
 			global $DB;
 			
-			$req = $DB->request('SELECT MAX(id) as max FROM glpi_plugin_protocolsmanager_protocols');
+			$req = $DB->request([
+				'SELECT' => \Glpi\DBAL\QueryFunction::max('id', 'max'),
+				'FROM' => 'glpi_plugin_protocolsmanager_protocols'
+			]);
 
 			if ($row = $req->current()) {
 				$nextnum = $row["max"];
