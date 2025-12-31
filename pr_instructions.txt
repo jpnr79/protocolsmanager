@@ -1,0 +1,19 @@
+Instructions to push branch and open PR
+
+1. Add your fork remote (if not already added):
+   git remote add fork https://github.com/jpnr79/protocolsmanager.git
+
+2. Push the branch:
+   git push -u fork compat/glpi-11
+
+3. Open a Pull Request on GitHub:
+   - Go to: https://github.com/jpnr79/protocolsmanager/compare
+   - Select `compat/glpi-11` as the branch to compare and create a PR targeting the upstream repository `CanMik/protocolsmanager` main branch.
+   - Use the contents of `pr_body.txt` as the PR description.
+
+Alternatively, using GitHub CLI (if installed):
+   gh repo fork --clone=false
+   git push -u fork compat/glpi-11
+   gh pr create --base CanMik:main --head jpnr79:compat/glpi-11 --title "compat: Make plugin compatible with GLPI 11" --body-file pr_body.txt
+
+If you'd like, provide a short-lived personal access token or add me as a collaborator and I can push and open the PR for you.
